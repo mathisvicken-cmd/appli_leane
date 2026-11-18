@@ -255,6 +255,14 @@ button.mini::before{content:"";position:absolute;inset:-12px}
 .phg{width:100%;padding:8px 6px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:15px;text-align:center}
 .phu{font-size:12px;color:var(--muted)}
 .phk{font-size:12.5px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.scan{display:flex;align-items:center;gap:12px;margin-top:12px;padding:14px;border-radius:20px;cursor:pointer;
+  background:linear-gradient(135deg,#EFE9FB,var(--rose-soft));border:1px solid #E6DCF4;transition:transform .15s var(--ease)}
+.scan:active{transform:scale(.98)}
+.scan .si{width:44px;height:44px;border-radius:15px;background:#fff;display:grid;place-items:center;font-size:22px;flex:none}
+.scan .st{flex:1;min-width:0}
+.scan .st b{display:block;font:650 17px var(--f-title)}
+.scan .st span{display:block;font-size:12.5px;color:var(--muted);line-height:1.35}
+.scan .chev{width:32px;height:32px;border-radius:11px;background:var(--lav);color:#fff;display:grid;place-items:center;flex:none}
 .favbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:99px;background:var(--lav-soft);color:var(--lav);font-weight:650;font-size:13px}
 
 /* ---------- Suivi ---------- */
@@ -950,6 +958,8 @@ function foodBody(){
       <button class="rest ${t==="rest"?"on":""}" data-a="type" data-t="rest"><b>Jour sans course</b><span>Moins de féculents</span></button>
     </div>
     <div class="muted" style="font-size:12px;margin-top:6px;text-align:center">${!f.type?"Choisi automatiquement d'après ton plan de course":`Choisi à la main · <button style="text-decoration:underline;font-size:12px;color:var(--muted)" data-a="type" data-t="">revenir à l'auto</button>`}</div>
+    <label class="scan"><input type="file" accept="image/*" id="scanin" hidden>
+      <span class="si bob">📷</span><span class="st"><b>Scanner mon repas</b><span>Prends ton assiette en photo : je reconnais les aliments et je les range dans le bon repas</span></span><span class="chev">${I.r}</span></label>
     <div class="card" style="margin-top:14px"><div class="ringwrap">${ring(e,tg,t,"food")}<div><div id="fstatus" style="font:650 17px var(--f-title)">${status(e,tg)}</div>
       ${PLAN[d]&&S.done[d]?`<div class="muted" style="font-size:13px;margin-top:6px">🏃‍♀️ Séance faite : ~${kcalRun(PLAN[d])} kcal dépensées</div>`:""}
       <div class="muted" style="font-size:12.5px;margin-top:6px">Note ce que tu as mangé : l'appli le compare à ton programme.</div></div></div>
@@ -1009,15 +1019,13 @@ function addList(){
     ${nothing&&q?`<div class="muted" style="padding:10px 4px">Pas trouvé : essaie les produits de marque, la photo, ou la saisie libre en dessous ↓</div>`:""}`;
 }
 function addSheet(){
-  sheet(`<div class="row between"><h2 style="margin:4px 0">Ajouter · ${esc(ADD.meal)}</h2>
-      <label class="photobtn">📷 Photo<input type="file" accept="image/*" id="ph" hidden></label></div>
+  sheet(`<h2>Ajouter · ${esc(ADD.meal)}</h2>
     <input class="search" id="q" placeholder="Chercher un repas ou un aliment…" value="${esc(ADD.q)}" autocomplete="off">
     <div class="addscroll" id="addlist">${addList()}</div>
     <div class="addfree"><div class="sec" style="margin:0 0 6px">Saisie libre</div>
       <div class="freerow"><input id="fn" placeholder="Ce que j'ai mangé" value="${esc(ADD.q)}"><input id="fk" type="number" inputmode="numeric" placeholder="kcal"><button class="btn" data-a="free">${I.plus}</button></div></div>`, false, "tall");
   const inp=document.getElementById("q"), fn=document.getElementById("fn");
   fn.addEventListener("input",()=>fn.dataset.touched=1);
-  document.getElementById("ph").addEventListener("change",e=>{ const f=e.target.files?.[0]; if(f) handlePhoto(f); });
   inp.addEventListener("input",()=>{ ADD.q=inp.value; const l=document.getElementById("addlist"); l.innerHTML=addList(); l.scrollTop=0; if(!fn.dataset.touched) fn.value=inp.value; });
 }
 const tplK = m=>m.data.items.reduce((a,i)=>a+(+i.k||0),0);
@@ -1047,6 +1055,17 @@ async function offSearch(){
 }
 // Photo du repas → Gemini (via la fonction Supabase) → aliments recalés sur la table Ciqual
 let PH=[];
+// Heure « type » de chaque repas (les séances de Léane sont plutôt en fin de journée)
+const MEAL_HOUR={"Petit-déjeuner":8,"Déjeuner":12.75,"Goûter":16.5,"1 h avant la séance":17.25,"Après la séance":19,"Dîner":20.25};
+function guessMeal(){
+  const meals=MENU[dayType(FOODDAY)], empty=meals.filter(m=>!mealEnts(FOODDAY,m).length);
+  if(FOODDAY!==TODAY) return (empty[0]||meals[meals.length-1]).m;                 // autre jour : le premier repas pas encore noté
+  const now=new Date(), h=now.getHours()+now.getMinutes()/60;
+  const near=list=>list.slice().sort((a,b)=>Math.abs((MEAL_HOUR[a.m]??12)-h)-Math.abs((MEAL_HOUR[b.m]??12)-h))[0];
+  // parmi les repas pas encore notés et pas « dans le futur » (plus d'1 h 30 d'avance), le plus proche de l'heure
+  const ok=empty.filter(m=>(MEAL_HOUR[m.m]??12)<=h+1.5);
+  return (near(ok.length?ok:empty.length?empty:meals)).m;
+}
 const STOP=new Set(["de","du","des","la","le","les","et","au","aux","en","a","sans","avec","sur","un","une","ou","type","precision","moyen","aliment"]);
 const toks=n=>norm(n).split(" ").filter(w=>w.length>1&&!STOP.has(w)).map(stem);
 function ciqualMatch(name){
@@ -1079,13 +1098,16 @@ async function handlePhoto(file){
     PH=(data.aliments||[]).map(a=>{ const g=Math.max(1,Math.round(+a.grammes||0)), m=ciqualMatch(a.nom);
       const per=m?{k:m.k,mm:m.m,c:m.c}:{k:Math.round((+a.kcal||0)/g*100), mm:[(+a.proteines||0)/g*100,(+a.glucides||0)/g*100,(+a.lipides||0)/g*100], c:a.famille||guessCat(a.nom)};
       return {on:true, nom:m?m.n:a.nom, vu:a.nom, g, ...per, conf:a.confiance||"moyenne", cq:!!m}; });
-    if(!PH.length){ sheet(`<h2>Rien trouvé</h2><div class="muted">${esc(data.remarque||"Je n'ai pas reconnu d'aliment sur cette photo.")}</div><button class="btn soft full" style="margin-top:14px" data-a="addback">Retour</button>`); return; }
+    if(!PH.length){ sheet(`<h2>Rien trouvé</h2><div class="muted">${esc(data.remarque||"Je n'ai pas reconnu d'aliment sur cette photo.")}</div><button class="btn soft full" style="margin-top:14px" data-a="close">Retour</button>`); return; }
     photoSheet(data.remarque);
-  }catch(e){ sheet(`<h2>Oups</h2><div class="muted" style="white-space:pre-line">${esc(e.message||"L'analyse n'a pas marché.")}</div><button class="btn soft full" style="margin-top:14px" data-a="addback">Retour</button>`); }
+  }catch(e){ sheet(`<h2>Oups</h2><div class="muted" style="white-space:pre-line">${esc(e.message||"L'analyse n'a pas marché.")}</div><button class="btn soft full" style="margin-top:14px" data-a="close">Retour</button>`); }
 }
 function photoSheet(note){
   const tot=()=>PH.filter(x=>x.on).reduce((a,x)=>a+Math.round(x.k*x.g/100),0);
-  sheet(`<h2>📷 Sur ta photo</h2><div class="muted" style="font-size:13px">Vérifie et corrige les quantités : c'est une estimation. Décoche ce qui n'y est pas.</div>
+  sheet(`<h2>📷 Sur ta photo</h2>
+    <div class="sec" style="margin-top:6px">Pour quel repas ?</div>
+    <div class="chips">${MENU[dayType(FOODDAY)].map(m=>`<button class="${m.m===ADD.meal?"on":""}" data-a="phmeal" data-m="${esc(m.m)}">${m.m}</button>`).join("")}</div>
+    <div class="muted" style="font-size:13px;margin-top:4px">Vérifie et corrige les quantités : c'est une estimation. Décoche ce qui n'y est pas.</div>
     ${note?`<div class="tipline">${esc(note)}</div>`:""}
     <div class="phl">${PH.map((x,i)=>`<div class="phr ${x.on?"":"off"}" data-i="${i}">
       <button class="phc" data-i="${i}">${x.on?CK:""}</button>
@@ -1093,7 +1115,7 @@ function photoSheet(note){
       <input class="phg" data-i="${i}" type="number" inputmode="numeric" value="${x.g}"><span class="phu">g</span><span class="phk" id="phk${i}">${Math.round(x.k*x.g/100)}</span></div>`).join("")}</div>
     <div class="row between card" style="margin-top:10px"><b style="font:650 16px var(--f-title)">Total</b><b class="big" id="phtot" style="font-size:24px">${tot()} kcal</b></div>
     <button class="btn full" style="margin-top:12px" data-a="phok">Ajouter à « ${esc(ADD.meal)} »</button>
-    <button class="btn ghost full" style="margin-top:8px" data-a="addback">Annuler</button>`);
+    <button class="btn ghost full" style="margin-top:8px" data-a="close">Annuler</button>`);
   document.querySelectorAll(".phg").forEach(el=>el.addEventListener("input",()=>{ const x=PH[+el.dataset.i]; x.g=Math.max(0,+el.value||0);
     document.getElementById("phk"+el.dataset.i).textContent=Math.round(x.k*x.g/100); document.getElementById("phtot").textContent=tot()+" kcal"; }));
   document.querySelectorAll(".phc").forEach(el=>el.addEventListener("click",()=>{ const x=PH[+el.dataset.i]; x.on=!x.on; el.innerHTML=x.on?CK:""; el.parentNode.classList.toggle("off",!x.on); document.getElementById("phtot").textContent=tot()+" kcal"; }));
@@ -1101,7 +1123,7 @@ function photoSheet(note){
 function photoConfirm(){
   const f=foodDay(FOODDAY), list=PH.filter(x=>x.on&&x.g>0); if(!list.length){ toast("Coche au moins un aliment"); return; }
   list.forEach(x=>f.extras.push({id:uid(), meal:ADD.meal, n:`${x.nom} · ${x.g} g`, base:x.nom, k:Math.round(x.k*x.g/100), b:x.k, u:"g", q:x.g, c:x.c, bm:x.mm, from:"📷 Photo"}));
-  save("food:"+FOODDAY); closeSheet(); refreshFood(); toast(`${list.length} aliment${list.length>1?"s":""} ajouté${list.length>1?"s":""} 📷`);
+  save("food:"+FOODDAY); closeSheet(); refreshFood(); toast(`${list.length} aliment${list.length>1?"s":""} ajouté${list.length>1?"s":""} au ${ADD.meal.toLowerCase()} 📷`);
 }
 function pushExtra(x){ if(!x.c) x.c=guessCat(x.n); const f=foodDay(FOODDAY); x.id=uid(); x.meal=ADD.meal; f.extras.push(x); JUST=x.id; save("food:"+FOODDAY); closeSheet(); refreshFood(); toast(`Ajouté · ${x.k} kcal`); }
 // Redessine seulement la zone du jour (l'en-tête et ses cerises ne bougent pas) ; glissé fondu quand on change de jour
@@ -1342,6 +1364,8 @@ const A = {
   pickoff:b=>{ ADD.food=OFF[+b.dataset.i]; qtySheet(); },
   off:()=>offSearch(),
   phok:()=>photoConfirm(),
+  close:()=>closeSheet(),
+  phmeal:b=>{ ADD.meal=b.dataset.m; document.querySelectorAll('[data-a="phmeal"]').forEach(x=>x.classList.toggle("on",x===b)); document.querySelector('[data-a="phok"]').textContent=`Ajouter à « ${ADD.meal} »`; },
   addback:()=>addSheet(),
   addpick:()=>{ const f=ADD.food, q=parseFloat(document.getElementById("qv").value)||0; pushExtra({n:`${f.n} · ${q}${f.u==="g"?" g":" portion"+(q>1?"s":"")}`, base:f.n, k:kcalOf(f,q), b:f.k, u:f.u, q, c:f.c, bm:f.m||undefined}); },
   addsg:b=>{ const t=dayType(FOODDAY), meal=MENU[t][+b.dataset.m], f=allFoods()[+b.dataset.i], q=+b.dataset.q, fd=foodDay(FOODDAY);
@@ -1405,6 +1429,7 @@ const A = {
     TAB=TABS[j][0]; if(TAB==="food") FOODDAY=TODAY; render(dx<0?"left":"right"); scrollTo({top:0});
   },{passive:true});
 })();
+document.addEventListener("change",e=>{ if(e.target.id==="scanin"){ const f=e.target.files?.[0]; e.target.value=""; if(f){ ADD={meal:guessMeal(),q:""}; handlePhoto(f); } } });
 document.addEventListener("click",e=>{ const b=e.target.closest("[data-a]"); if(b&&A[b.dataset.a]){ e.preventDefault(); A[b.dataset.a](b); } });
 
 /* =====================================================================
