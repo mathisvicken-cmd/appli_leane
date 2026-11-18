@@ -1332,6 +1332,7 @@ function settingsSheet(){
     <div class="field wide"><label>Poids de référence si aucune mesure (kg)</label><input id="sw" type="number" inputmode="decimal" value="${S.settings.weight||""}" placeholder="60"></div></div>
     <button class="btn full" style="margin-top:14px" data-a="saveset">Enregistrer</button>
     <button class="btn soft full" style="margin-top:8px" data-a="previewj">${PREVIEW_J?"Quitter l'aperçu du jour J":"🏅 Voir l'écran du jour J"}</button>
+    <p class="note"><b>Version 12</b> · 18 nov. 2026</p>
     <p class="note">Valeurs nutritionnelles : table Ciqual 2025 de l'ANSES et Open Food Facts (base collaborative, licence ODbL). Photo analysée par Google Gemini.</p>
     ${sb?`<button class="btn ghost full" style="margin-top:8px" data-a="logout">Se déconnecter</button>`:`<p class="note">Mode aperçu : les données restent sur ce téléphone.</p>`}`);
 }
