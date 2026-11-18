@@ -73,8 +73,8 @@ h2 .deco{width:22px;height:22px}
 .enter > *:nth-child(n+8){animation-delay:.28s}
 .slideL{animation:slideL .35s var(--ease) both}
 .slideR{animation:slideR .35s var(--ease) both}
-.bob{animation:bob 4s ease-in-out infinite}
-.twinkle{animation:twinkle 2.4s ease-in-out infinite}
+.bob{animation:bob 4s ease-in-out infinite;will-change:transform;backface-visibility:hidden}
+.twinkle{animation:twinkle 2.4s ease-in-out infinite;will-change:transform,opacity}
 .spin{animation:spin 18s linear infinite;transform-origin:center}
 .justpop{animation:pop .45s var(--spring)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -160,7 +160,7 @@ button.mini::before{content:"";position:absolute;inset:-12px}
 .daynav .lbl{text-align:center}
 .daynav .lbl b{font:650 18px var(--f-title);display:block}
 .typesw{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.typesw button{padding:12px;border-radius:16px;text-align:left;background:var(--card);border:2px solid var(--line);transition:background .3s,border-color .3s,color .3s,transform .15s}
+.typesw button{padding:12px;border-radius:16px;text-align:left;background:var(--card);border:2px solid var(--line);transition:transform .15s}
 .typesw button b{display:block;font:650 16px var(--f-title)}
 .typesw button span{font-size:12px;color:var(--muted);transition:color .3s}
 .typesw button.on.run{background:var(--run);border-color:var(--run);color:#fff}
@@ -199,7 +199,7 @@ button.mini::before{content:"";position:absolute;inset:-12px}
 .foot{margin-top:16px;background:#F3ECE4;border-radius:var(--r);padding:14px 16px;font-size:13.5px;display:grid;gap:6px;position:relative;overflow:hidden}
 .foot .ill{position:absolute;right:-6px;bottom:-8px;width:64px;opacity:.6}
 .daynav .todaybtn{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:5px 12px;border-radius:99px;background:var(--lav-soft);color:var(--lav);font-size:12.5px;font-weight:650}
-.favcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:14px;padding:12px 14px;border-radius:20px;background:linear-gradient(135deg,var(--lav-soft),#F6EEFA);border:1px solid #E2DBF3}
+.favcard{isolation:isolate;transform:translateZ(0);display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:14px;padding:12px 14px;border-radius:20px;background:linear-gradient(135deg,var(--lav-soft),#F6EEFA);border:1px solid #E2DBF3}
 .favcard .fi{width:40px;height:40px;border-radius:14px;background:#fff;display:grid;place-items:center;flex:none;padding:9px}
 .favcard .ft{flex:1;min-width:0}
 .favcard .ft b{display:block;font:650 16px var(--f-title);color:var(--ink)}
@@ -1134,7 +1134,10 @@ function refreshFood(dir){
   const fb=document.getElementById("foodbody"); if(TAB!=="food"||!fb){ render(); return; }
   const fc=document.querySelector(".favcard .ft span");                       // on ne met à jour que le texte : le cœur continue son mouvement
   if(fc){ const tmp=document.createElement("div"); tmp.innerHTML=favCard(); const nt=tmp.querySelector(".ft span").textContent; if(fc.textContent!==nt) fc.textContent=nt; }
-  if(!dir){ fb.innerHTML=foodBody(); JUST=null; animate(fb); checkBadges(); return; }
+  if(!dir){                                   // mise à jour sur place : hauteur et défilement figés pendant l'échange (pas de saut sur iPhone)
+    const y=scrollY; document.activeElement?.blur?.(); fb.style.minHeight=fb.offsetHeight+"px";
+    fb.innerHTML=foodBody(); JUST=null; animate(fb); scrollTo(0,y);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ fb.style.minHeight=""; })); checkBadges(); return; }
   foodAnim?.cancel(); const off=dir==="left"?-22:22;
   foodAnim=fb.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateX(${off}px)`}],{duration:150,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"});
   foodAnim.onfinish=()=>{ fb.innerHTML=foodBody(); animate(fb);

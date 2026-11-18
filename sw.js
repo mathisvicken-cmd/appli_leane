@@ -2,7 +2,7 @@
 // - la page : réseau d'abord (pour recevoir les mises à jour), copie locale si pas de réseau
 // - bibliothèque, polices, icônes : copie locale d'abord
 // - données Supabase : jamais mises en cache ici (gérées par l'appli)
-const CACHE = 'objectif-semi-v10';
+const CACHE = 'objectif-semi-v11';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png', './ciqual.json',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'];
 
