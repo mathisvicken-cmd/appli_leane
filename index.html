@@ -132,6 +132,9 @@ h2 .deco{width:22px;height:22px}
 .cal .d.past:not(.has){color:#C9BBB0}
 .cal .d small{font-size:9px;font-weight:600;opacity:.8}
 .cal .d.race{background:var(--lav)!important;color:#fff!important}
+.bloc{margin:26px 0 4px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,var(--lav-soft),var(--rose-soft))}
+.bloc b{display:block;font:650 17px var(--f-title)}
+.bloc span{font-size:13px;color:var(--muted)}
 .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stat{background:var(--bg);border-radius:18px;padding:12px}
@@ -232,6 +235,15 @@ nav.tabs svg{width:22px;height:22px}
 .note{font-size:12.5px;color:var(--muted);text-align:center;margin-top:18px}
 .confetti{position:fixed;pointer-events:none;z-index:70;width:9px;height:9px;border-radius:3px}
 
+.bstrip{display:flex;gap:6px;margin:10px 0 4px;min-height:58px;align-items:center}
+.bmini{animation:pop .5s var(--spring) both}
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+.bcell{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 6px;animation:rise .4s var(--ease) both}
+.bcell b{display:block;font:650 13px/1.2 var(--f-title);margin-top:2px}
+.bcell span{display:block;font-size:11px;color:var(--muted);line-height:1.3;margin-top:2px}
+.bcell.locked svg{filter:grayscale(1);opacity:.35}
+.badgebig{display:flex;justify-content:center;animation:pop .7s var(--spring) both}
+.badgebig svg{animation:wiggle 1.2s ease-in-out .7s 2}
 /* ---------- Connexion ---------- */
 .auth{min-height:80vh;display:flex;flex-direction:column;justify-content:center;gap:14px;text-align:center}
 .auth svg{width:120px;margin:0 auto}
@@ -253,7 +265,6 @@ const SUPABASE_KEY = "sb_publishable_43B3rz_EKEwCs6hAoCvgrg_iHB-CcEj";
 // En ligne (GitHub Pages) : connexion + Supabase. Ailleurs (aperçu) : mode démo, données sur le téléphone seulement.
 const LIVE = /github\.io$/.test(location.hostname) && typeof supabase !== "undefined";
 const RACE = "2027-03-07";            // Semi de Paris
-const PLAN_START = "2026-11-23";      // lundi de la semaine 1 du plan par défaut
 
 /* =====================================================================
    1. OUTILS DATES / FORMATS
@@ -300,57 +311,107 @@ const FOODS = [
 ];
 
 /* =====================================================================
-   3. PLAN DE COURSE (par défaut, en attendant le sien) — allures selon l'objectif
+   3. PROGRAMME DE COURSE DE LÉANE (20 semaines, du 19 oct au 7 mars)
    ===================================================================== */
 const KIND = {
-  frac:{lbl:"Fractionné", c:"var(--rose)", s:"var(--rose-soft)", d:"heart"},
+  frac:{lbl:"Qualité", c:"var(--rose)", s:"var(--rose-soft)", d:"heart"},
   as:{lbl:"Allure semi", c:"var(--butter)", s:"var(--butter-soft)", d:"sun"},
   sl:{lbl:"Sortie longue", c:"var(--run)", s:"var(--run-soft)", d:"shoe"},
-  ef:{lbl:"Footing", c:"var(--sage)", s:"var(--sage-soft)", d:"leaf"},
+  ef:{lbl:"Endurance", c:"var(--sage)", s:"var(--sage-soft)", d:"leaf"},
+  test:{lbl:"Test 10 km", c:"var(--rest)", s:"var(--rest-soft)", d:"medal"},
   race:{lbl:"Jour J", c:"var(--lav)", s:"var(--lav-soft)", d:"medal"},
 };
-function paces(){
-  const g = (S.settings.goal||150)*60/21.0975;               // secondes / km à l'allure semi
-  return {AS:mmss(g)+"/km", EF:`${mmss(g+10)}–${mmss(g+35)}/km`, K1:mmss(g-30)+"/km", K4:mmss(g-55)+"/km", sec:g};
-}
-function buildPlan(){
-  const P = paces();
-  const WU = {t:"Échauffement", d:`15 min de footing tranquille (${P.EF}) + 3 accélérations progressives`};
-  const CD = {t:"Retour au calme", d:"10 min de footing très lent, puis 5 min d'étirements doux"};
-  const footing = (min,extra)=>({kind:"ef", title:`Footing ${min} min`, km:+(min*60/(P.sec+20)).toFixed(1),
-    steps:[{t:"Footing", d:`${min} min en endurance fondamentale (${P.EF}) : tu dois pouvoir parler en courant`}, ...(extra?[{t:"Pour finir",d:extra}]:[]), {t:"Étirements",d:"5 min de mobilité douce (mollets, ischios, hanches)"}],
-    tip:"Footing de récupération : lentement, c'est le but. Ça construit l'endurance sans fatiguer."});
-  const SL = [9,10,11,8,12,13,14,10,15,16,17,12,18,12];
-  const AS = {1:[2,8],2:[2,10],3:[3,8],5:[2,12],6:[3,10],7:[2,15],9:[3,12],10:[2,18],11:[3,15],13:[2,20],14:[2,10]};
-  const FC = {1:6,3:7,5:8,7:8,9:9,11:10,13:10,14:6}, FL = {2:3,6:4,10:5};
-  const out = [];
-  for(let w=1; w<=15; w++){
-    const mon = add(pd(PLAN_START),(w-1)*7), recov=[4,8,12].includes(w);
-    let a,b,c;
-    if(w===15) a = footing(35,"4 lignes droites de 80 m, relâchée, récup en marchant");
-    else if(recov) a = footing(40);
-    else if(FC[w]){ const n=FC[w]; a={kind:"frac", title:`${n} × 400 m`, km:+(2.2+n*0.6+1.5).toFixed(1), steps:[WU,{t:"Corps de séance",d:`${n} × 400 m à ${P.K4}, récup 1 min 30 en trottinant entre chaque`},CD], tip:"Le fractionné court travaille la vitesse : la dernière répétition doit ressembler à la première."}; }
-    else { const n=FL[w]||4; a={kind:"frac", title:`${n} × 1000 m`, km:+(2.2+n*1.3+1.5).toFixed(1), steps:[WU,{t:"Corps de séance",d:`${n} × 1000 m à ${P.K1}, récup 2 min en trottinant`},CD], tip:"Allure soutenue mais contrôlée : tu peux dire quelques mots, pas une phrase."}; }
-    if(w===15) b = footing(25,"3 × 1 min à allure semi pour réveiller les jambes");
-    else if(recov) b = footing(35);
-    else { const [n,m]=AS[w]; b={kind:"as", title:`${n} × ${m} min allure semi`, km:+(2.2+n*m*60/P.sec+(n-1)*0.4+1.5).toFixed(1), steps:[WU,{t:"Corps de séance",d:`${n} × ${m} min à allure semi (${P.AS}), récup 3 min en footing`},CD], tip:"Apprends à ton corps l'allure du jour J : régulière, sans regarder la montre toutes les 10 secondes."}; }
-    if(w===15) c={kind:"race", title:"Semi-marathon de Paris", km:21.1,
-      steps:[{t:"Départ",d:"Les 5 premiers km 5 à 10 s/km plus lents que l'allure, même si tout le monde part vite"},{t:"Du 5e au 18e km",d:`Cale-toi à ${P.AS}, bois à chaque ravito`},{t:"Les 3 derniers km",d:"Tout ce qu'il te reste 💪"}],
-      tip:"Rien de nouveau le jour J : même petit-déjeuner, mêmes chaussures, même tenue que pendant la prépa."};
-    else { const km=SL[w-1], fin=w>=9&&!recov; c={kind:"sl", title:`Sortie longue ${km} km`, km,
-      steps:[{t:"Course",d:`${km} km en endurance (${P.EF})`}, ...(fin?[{t:"Fin de sortie",d:`Les 2 derniers km à allure semi (${P.AS})`}]:[]),
-             {t:"Ravitaillement",d:km>=14?"Emporte de l'eau, et un gel ou des fruits secs vers 1 h de course":"Emporte un peu d'eau s'il fait chaud"},
-             {t:"Après",d:"Étirements doux et collation (skyr + fruit)"}],
-      tip:"La séance la plus importante de la semaine. Lentement, vraiment lentement."}; }
-    [[1,a],[3,b],[6,c]].forEach(([off,s])=>out.push({...s,date:ymd(add(mon,off)),week:w}));
-  }
-  return out;
-}
-let PLAN = {}, PLAN_DATES = [], WEEKS = 15;
+const PLAN_START = "2026-10-19";      // lundi de la semaine 1
+const LEXIQUE = [
+  ["EF","7:45–8:15/km, tu peux parler en phrases complètes"],["Trot","récup à 8:30/km ou plus lent, tu peux marcher si besoin"],
+  ["LD","ligne droite : 20 s en accélérant jusqu'à ~5:30/km, relâchée, puis 1 min de marche"],
+  ["VMA","5:30–5:45/km"],["Allure 10k","6:25–6:35/km"],["Seuil","6:30–6:40/km"],["AS","allure semi objectif : 6:10/km"],
+  ["Retour au calme","trot très lent puis marche, et étirements doux le soir"]];
+const BLOCS = [
+  [1,4,"Bloc 1 — Fondations","Apprendre à courir lentement, allonger la sortie longue, réveiller la vitesse en douceur."],
+  [5,8,"Bloc 2 — Développement","Développer la vitesse et le seuil, sortie longue jusqu'à 14 km, puis premier test."],
+  [9,12,"Bloc 3 — Seuil","Allonger les efforts au seuil, découvrir l'allure semi, sortie longue jusqu'à 16 km. Pendant les fêtes, garde au minimum la qualité et la sortie longue."],
+  [13,18,"Bloc 4 — Spécifique semi","Beaucoup de km à AS, sortie longue jusqu'à 19 km, entraîner ton ventre aux gels, t'habituer à courir le matin."],
+  [19,20,"Bloc 5 — Affûtage et course","Réduire le volume pour arriver fraîche, en gardant un peu d'AS. Tu peux te sentir lourde ou nerveuse : c'est normal, la forme revient le jour J."]];
+const LIGHT = [4,8,12];               // semaines allégées
+// [semaine, jour (1=mar, 3=jeu, 4=ven, 6=dim), type, km estimés, durée (min), titre, échauffement, corps de séance, retour au calme, but]
+const W="20 min EF + 3 LD", SLW="10 premières min à 8:15", M5="5 min de marche", E10="10 min EF lent";
+const RAW = [
+ [1,1,"ef",5.3,50,"40 min EF + 5 LD","— (tout est en EF)","40 min EF à 7:45–8:15, puis 5 LD",M5,"Trouver ta vraie allure EF : tu dois pouvoir parler"],
+ [1,3,"ef",4.4,40,"35 min EF","","35 min EF continu",M5,"Récupération active, très facile"],
+ [1,6,"sl",9,80,"Sortie longue 9 km","10 premières min à 8:15 ou plus lent","9 km EF au total (~1h12)",M5,"Finir frais, zéro point de côté"],
+ [2,1,"frac",5.8,45,"8 × 1 min VMA",W,"8 × (1 min VMA à 5:30–5:45 / 1 min trot)",E10,"La 8e répétition aussi rapide que la 1re"],
+ [2,3,"ef",5,45,"40 min EF","","40 min EF",M5,"Facile, conversation possible"],
+ [2,6,"sl",10,85,"Sortie longue 10 km",SLW,"10 km EF (~1h20)",M5,"Régularité, allure stable"],
+ [3,1,"frac",6.4,50,"10 × 1 min VMA",W,"10 × (1 min VMA / 1 min trot)",E10,"Rester relâchée : épaules basses, mains souples"],
+ [3,3,"ef",5.8,55,"45 min EF + 6 LD","","45 min EF, puis 6 LD",M5,"Facile, les LD réveillent la foulée"],
+ [3,6,"sl",11,95,"Sortie longue 11 km","10 premières min à 8:15","11 km EF (~1h28)",M5,"Prendre une petite bouteille d'eau"],
+ [4,1,"frac",6.5,50,"6 × 2 min allure 10k",W,"6 × (2 min allure 10k à 6:25–6:35 / 1:30 trot)",E10,"Découvrir l'allure 10k, contrôlée"],
+ [4,3,"ef",4.4,40,"35 min EF","","35 min EF",M5,"Récupérer"],
+ [4,6,"sl",8,65,"8 km dont 2 km à 7:00","10 premières min à 8:15","8 km : 6 km EF puis 2 km à 7:00",M5,"Finir un peu plus vite sur des jambes un peu fatiguées"],
+ [5,1,"frac",6.8,52,"5 × 3 min allure 10k",W,"5 × (3 min allure 10k à 6:25–6:35 / 1:30 trot)",E10,"Tenir l'allure sans s'emballer"],
+ [5,3,"ef",5.6,50,"45 min EF","","45 min EF",M5,"Facile"],
+ [5,6,"sl",12,100,"Sortie longue 12 km",SLW,"12 km EF (~1h35)",M5,"Eau + une pâte de fruits si besoin"],
+ [6,1,"frac",6.3,48,"12 × 45 s VMA",W,"12 × (45 s VMA à 5:30 / 45 s trot)",E10,"Vite mais fluide, sans sprinter"],
+ [6,3,"ef",5.8,55,"45 min EF + 6 LD","","45 min EF, puis 6 LD",M5,"Facile"],
+ [6,6,"sl",13,110,"Sortie longue 13 km",SLW,"13 km EF (~1h43)",M5,"Allure stable jusqu'au bout"],
+ [7,1,"frac",8,60,"3 × 8 min seuil",W,"3 × (8 min seuil à 6:30–6:40 / 2 min trot)",E10,"Effort « confortablement dur », quelques mots possibles"],
+ [7,3,"ef",6.3,55,"50 min EF","","50 min EF",M5,"Facile"],
+ [7,6,"sl",14,120,"Sortie longue 14 km",SLW,"14 km EF (~1h50)",M5,"Plus longue sortie depuis la reprise"],
+ [8,1,"ef",5.3,50,"40 min EF + 5 LD","","40 min EF, puis 5 LD",M5,"Garder du jus pour le test"],
+ [8,3,"ef",3.7,35,"30 min EF très facile","","30 min EF très facile (8:15 ou plus lent)",M5,"Jambes légères"],
+ [8,6,"test",13,90,"Test 10 km à fond","15 min EF + 4 LD","TEST 10 km à fond : 2 premiers km à ~6:35, puis accélère progressivement, tout donner sur les 2 derniers","10 min trot + marche","Noter ton temps → recalage des allures"],
+ [9,1,"frac",8,60,"6 × 3 min VMA",W,"6 × (3 min VMA à 5:40–5:50 / 2 min trot)",E10,"Répétitions régulières, la dernière aussi bonne que la 1re"],
+ [9,3,"ef",6.3,55,"50 min EF","","50 min EF",M5,"Facile"],
+ [9,6,"sl",14,110,"14 km dont 3 km à AS",SLW,"14 km : 11 km EF puis 3 km à AS (6:10)",M5,"Sentir l'allure du jour J sur jambes fatiguées"],
+ [10,1,"ef",5.8,55,"45 min EF + 6 LD","","45 min EF, puis 6 LD",M5,"Facile (semaine de Noël)"],
+ [10,3,"frac",8.2,62,"4 × 6 min seuil",W,"4 × (6 min seuil à 6:30–6:40 / 2 min trot)",E10,"Contrôlé, respiration ample"],
+ [10,6,"sl",15,125,"Sortie longue 15 km",SLW,"15 km EF (~2h)",M5,"Eau + collation à 1h"],
+ [11,1,"frac",7.8,57,"2 × 12 min seuil",W,"2 × (12 min seuil / 3 min trot)",E10,"Tenir 12 min sans ralentir"],
+ [11,3,"ef",5.6,50,"45 min EF","","45 min EF",M5,"Facile"],
+ [11,6,"sl",16,135,"Sortie longue 16 km",SLW,"16 km EF (~2h08)",M5,"Premier essai de gel ou pâte de fruits vers 45 min"],
+ [12,1,"frac",6.4,50,"10 × 1 min VMA",W,"10 × (1 min VMA / 1 min trot)",E10,"Vitesse sans fatigue"],
+ [12,3,"ef",5,45,"40 min EF","","40 min EF",M5,"Récupérer"],
+ [12,6,"sl",12,90,"12 km dont 4 km à AS",SLW,"12 km : 5 km EF + 4 km AS + 3 km EF",M5,"AS fluide et régulière"],
+ [13,1,"frac",8.6,64,"3 × 10 min seuil",W,"3 × (10 min seuil / 2 min trot)",E10,"Régulier du début à la fin"],
+ [13,3,"ef",6.5,60,"50 min EF + 6 LD","","50 min EF, puis 6 LD",M5,"Facile"],
+ [13,6,"sl",16,120,"16 km dont 6 km à AS",SLW,"16 km : 4 km EF + 3 km AS + 2 km EF + 3 km AS + 4 km EF",M5,"Gel à 45 min et à 1h30"],
+ [14,1,"frac",8.4,63,"5 × 1000 m",W,"5 × (1 000 m à 6:25 / 2 min trot)",E10,"Préparer le test"],
+ [14,3,"ef",5.6,50,"45 min EF","","45 min EF",M5,"Facile"],
+ [14,6,"test",13,90,"Test 10 km à fond","15 min EF + 4 LD","TEST 10 km à fond (même protocole que le 13 déc), ou une course officielle","10 min trot + marche","Décide de l'objectif : sous 61 min → on vise 2h10"],
+ [15,1,"as",13,90,"3 × 3 km à AS",W,"3 × (3 km AS / 3 min trot)",E10,"9 km à l'allure du jour J"],
+ [15,3,"ef",6.3,55,"50 min EF","","50 min EF",M5,"Facile"],
+ [15,6,"sl",17,140,"Sortie longue 17 km",SLW,"17 km EF (~2h15)",M5,"2 gels + eau"],
+ [16,1,"frac",7.5,58,"8 × 2 min VMA",W,"8 × (2 min VMA / 1:30 trot)",E10,"Garder du peps"],
+ [16,3,"ef",6.3,55,"50 min EF","","50 min EF",M5,"Facile"],
+ [16,6,"sl",18,135,"18 km dont 9 km à AS",SLW,"18 km : 4 km EF + 3 × (3 km AS / 1 km EF) + 3 km EF",M5,"Gels + le matin si possible"],
+ [17,1,"as",12.5,85,"2 × 4 km à AS",W,"2 × (4 km AS / 4 min trot)",E10,"Allure facile à tenir ?"],
+ [17,3,"ef",5.6,50,"45 min EF","","45 min EF",M5,"Facile"],
+ [17,6,"sl",19,160,"Sortie longue 19 km",SLW,"19 km EF (~2h30), la plus longue","10 min de marche","Le matin, vrai petit-déjeuner 2h30 avant, gels"],
+ [18,1,"as",12.5,87,"4 × 2 km à AS",W,"4 × (2 km AS / 2 min trot)",E10,"AS automatique"],
+ [18,3,"ef",5.6,50,"45 min EF","","45 min EF",M5,"Facile"],
+ [18,6,"as",14,105,"Répétition générale",SLW,"Répétition générale le matin : 3 km EF + 8 km AS + 3 km EF",M5,"Tenue, chaussures, petit-déj et gels du jour J"],
+ [19,1,"as",10,73,"3 × 2 km à AS",W,"3 × (2 km AS / 2 min trot)",E10,"AS facile et fluide"],
+ [19,3,"ef",5,45,"40 min EF","","40 min EF",M5,"Facile"],
+ [19,6,"sl",12,95,"12 km dont 3 km à AS",SLW,"12 km : 9 km EF + 3 km AS",M5,"Dernière sortie un peu longue"],
+ [20,1,"as",8,60,"3 × 1 km à AS","15 min EF","20 min EF + 3 × (1 km AS / 2 min trot)",M5,"Rester en rythme, sans fatigue"],
+ [20,4,"ef",3.5,35,"25 min EF + 4 LD","","25 min EF très facile, puis 4 LD",M5,"Juste dégourdir les jambes. Demain samedi : repos complet (ou 15 min de marche) ; dossard, tenue prête, dîner riche en glucides"],
+ [20,6,"race",21.1,130,"Semi-marathon de Paris","10 min de marche active + trot léger + montées de genoux","SEMI DE PARIS : km 1–3 à 6:20–6:25, km 4–15 à 6:10, km 16–21 à 6:05 si ça va","Marcher, boire, manger","Profiter ! Gels vers les km 7–8 et 14–15"],
+];
+const HER_PLAN = RAW.map(([w,off,kind,km,dur,title,wu,body,cd,but])=>({
+  date:ymd(add(pd(PLAN_START),(w-1)*7+off)), week:w, kind, km, dur, title, tip:but,
+  steps:[wu&&!wu.startsWith("—")?{t:"Échauffement",d:wu}:null, {t:"Corps de séance",d:body}, cd?{t:"Retour au calme",d:cd}:null].filter(Boolean)}));
+const fmtDur = m=>m>=60?`${Math.floor(m/60)}h${String(m%60).padStart(2,"0")}`:`${m} min`;
+let PLAN = {}, PLAN_DATES = [], WEEKS = 20;
 function setPlan(){
-  const list = Array.isArray(S.plan) && S.plan.length ? S.plan : buildPlan();   // programme stocké dans Supabase s'il existe
+  const list = Array.isArray(S.plan) && S.plan.length ? S.plan : HER_PLAN;   // programme stocké dans Supabase s'il existe
   PLAN = {}; list.forEach(s=>PLAN[s.date]=s); PLAN_DATES = Object.keys(PLAN).sort();
   WEEKS = Math.max(...list.map(s=>s.week||1));
+}
+function lexiqueCard(){
+  return `<div class="card" style="margin-top:16px"><div class="row between"><b style="font:650 16px var(--f-title)">Lexique des allures</b><span class="bob" style="width:24px">${D.sparkle("#F3D88A")}</span></div>
+    <div style="display:grid;gap:6px;margin-top:10px;font-size:13.5px">${LEXIQUE.map(([k,v])=>`<div><b>${k}</b> <span class="muted">· ${v}</span></div>`).join("")}</div>
+    <div class="muted" style="font-size:12.5px;margin-top:8px">Mardi = qualité, jeudi = EF, dimanche = sortie longue. Tu peux décaler les jours en gardant un jour de repos entre deux séances. Recale les allures après les tests du 13 décembre et du 24 janvier.</div></div>`;
 }
 
 /* =====================================================================
@@ -483,7 +544,7 @@ function render(anim){
   if(anim){ v.style.animation="none"; v.offsetHeight; v.style.animation=""; }
   document.querySelectorAll("#tabs button").forEach((b,i)=>b.classList.toggle("on",TABS[i][0]===TAB));
   document.getElementById("ind").style.transform=`translateX(${TABS.findIndex(t=>t[0]===TAB)*100}%)`;
-  JUST=null; animate();
+  JUST=null; animate(); checkBadges();
 }
 function animate(){
   // anneaux de calories
@@ -540,10 +601,10 @@ function sessCard(s, full){
   const corner = {heart:D.heart("#fff"),sun:D.sun("#fff"),shoe:D.shoe("#fff"),leaf:D.leaf("#fff"),medal:D.medal()}[K.d];
   return `<div class="sess" style="background:${K.s}">
     <span class="corner bob">${corner}</span>
-    <div class="row between"><span class="pill" style="background:${K.c};color:#fff">${K.lbl}</span><span class="muted" style="font-size:13px">Semaine ${s.week} / ${WEEKS}</span></div>
+    <div class="row between"><span class="pill" style="background:${K.c};color:#fff">${K.lbl}</span><span class="muted" style="font-size:13px">Semaine ${s.week} / ${WEEKS}${LIGHT.includes(s.week)?" · allégée":""}</span></div>
     <h3>${esc(s.title)}</h3>
     <div class="muted" style="font-size:13.5px">${fmtDay(s.date)}</div>
-    <div class="meta"><div><b>~${s.km} km</b>distance</div><div><b>~${kcalRun(s)} kcal</b>dépensées</div></div>
+    <div class="meta">${s.dur?`<div><b>~${fmtDur(s.dur)}</b>durée</div>`:""}<div><b>~${s.km} km</b>distance</div><div><b>~${kcalRun(s)} kcal</b>dépensées</div></div>
     ${full?`<ol class="steps">${s.steps.map((x,i)=>`<li><span class="n">${i+1}</span><div><b>${esc(x.t)}</b>${esc(x.d)}</div></li>`).join("")}</ol>${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:""}`:""}
     <button class="check ${done?"on":""} ${JUST==="run"+s.date?"justpop":""}" style="color:${K.c}" data-a="run" data-d="${s.date}"><span class="box">${done?I.check:""}</span><span style="color:var(--ink)">${done?"Séance faite, bravo !":"Je l'ai faite"}</span></button>
   </div>`;
@@ -576,7 +637,9 @@ function vHome(){
     ${s ? sessCard(s,true)
         : `<div class="restcard"><span class="ill bob">${D.cloud()}</span><span class="pill" style="background:#fff;color:var(--rest)">Repos</span>
             <h3>Repos aujourd'hui</h3><div class="muted" style="max-width:72%">Les jambes récupèrent, c'est aussi ça l'entraînement.</div>
-            ${next?`<div style="margin-top:14px;font-size:13.5px">Prochaine séance : <b>${esc(PLAN[next].title)}</b>, ${fmtDay(next).toLowerCase()}</div>`:""}</div>`}`;
+            ${next?`<div style="margin-top:14px;font-size:13.5px">Prochaine séance : <b>${esc(PLAN[next].title)}</b>, ${fmtDay(next).toLowerCase()}</div>`:""}</div>`}
+    <h2>${deco(D.medal(),"bob","width:22px")} Mes badges</h2>
+    ${badgeStrip()}`;
 }
 
 /* --- Page Course --- */
@@ -592,7 +655,7 @@ function vRun(){
     <div class="seg" style="margin-top:16px"><span class="ind" style="transform:translateX(${CALMODE==="cal"?0:100}%)"></span><button class="${CALMODE==="cal"?"on":""}" data-a="cal" data-m="cal">Calendrier</button><button class="${CALMODE==="list"?"on":""}" data-a="cal" data-m="list">Par semaine</button></div>
     <div class="legend">${Object.values(KIND).map(k=>`<span class="pill" style="background:${k.s};color:${k.c}">${k.lbl}</span>`).join("")}</div>
     <div id="calbody">${CALMODE==="cal"?calendar():weekList()}</div>
-    ${S.plan?"":`<p class="note">Plan type en attendant ton programme · allures pour un semi en ${goalTxt()}</p>`}`;
+    ${lexiqueCard()}`;
 }
 function calendar(){
   let html="", cur=new Date(pd(PLAN_DATES[0]).getFullYear(), pd(PLAN_DATES[0]).getMonth(), 1);
@@ -610,8 +673,9 @@ function calendar(){
 function weekList(){
   let h=""; for(let w=1; w<=WEEKS; w++){
     const ds=PLAN_DATES.filter(d=>PLAN[d].week===w); if(!ds.length) continue;
-    const tot=ds.reduce((a,d)=>a+PLAN[d].km,0), nd=ds.filter(d=>S.done[d]).length;
-    h+=`<div class="wk"><div class="row between" style="margin-top:18px"><b style="font:650 17px var(--f-title)">Semaine ${w}${nd===ds.length?" ✨":""}</b><span class="muted" style="font-size:12.5px">~${Math.round(tot)} km · ${nd}/${ds.length}</span></div>
+    const tot=ds.reduce((a,d)=>a+PLAN[d].km,0), nd=ds.filter(d=>S.done[d]).length, bl=BLOCS.find(b=>b[0]===w);
+    if(bl) h+=`<div class="bloc"><b>${bl[2]}</b><span>${bl[3]}</span></div>`;
+    h+=`<div class="wk"><div class="row between" style="margin-top:18px"><b style="font:650 17px var(--f-title)">Semaine ${w}${LIGHT.includes(w)?" · allégée":""}${nd===ds.length?" ✨":""}</b><span class="muted" style="font-size:12.5px">~${Math.round(tot)} km · ${nd}/${ds.length}</span></div>
       ${ds.map(d=>{const p=PLAN[d],K=KIND[p.kind],dn=S.done[d];return `<button class="wrow card" data-a="sess" data-d="${d}"><span class="tag" style="background:${K.c}"></span>
         <span class="t"><b>${esc(p.title)}</b><span>${fmtDay(d,{weekday:"long",day:"numeric",month:"short"})} · ~${kcalRun(p)} kcal</span></span>
         <span class="mini ${dn?"on":""}" style="color:${K.c}">${dn?I.check:""}</span></button>`;}).join("")}</div>`;
@@ -761,13 +825,104 @@ function curve(pts,k,col){
       <text x="${p[0]}" y="${H-8}" font-size="10" text-anchor="middle" fill="#8C7B71">${pd(pts[i].day).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</text>`).join("")}</svg>`;
 }
 
+/* =====================================================================
+   BADGES : course, assiette, suivi — débloqués automatiquement
+   ===================================================================== */
+// Statistiques utiles aux badges
+function bstats(){
+  const done=PLAN_DATES.filter(d=>S.done[d]), km=done.reduce((a,d)=>a+PLAN[d].km,0);
+  const weeksFull=[...new Set(PLAN_DATES.map(d=>PLAN[d].week))].filter(w=>{ const ds=PLAN_DATES.filter(d=>PLAN[d].week===w); return ds.every(d=>S.done[d]); }).length;
+  const logged=Object.keys(S.food).filter(d=>eaten(d)>0).sort();
+  let streak=0, best=0, prev=null;                       // plus longue série de jours notés d'affilée
+  logged.forEach(d=>{ streak = prev && ymd(add(pd(prev),1))===d ? streak+1 : 1; best=Math.max(best,streak); prev=d; });
+  const full=(d,t,mi)=>MENU[t][mi].items.every((_,ii)=>S.food[d].checked[`${t}-${mi}-${ii}`]);
+  let perfect=0, bfast=0, ravito=0, choco=0;
+  Object.keys(S.food).forEach(d=>{ const f=S.food[d], t=dayType(d);
+    if(MENU[t].every((_,mi)=>full(d,t,mi))) perfect++;
+    if(full(d,t,0)) bfast++;
+    if(t==="run" && full(d,"run",2) && full(d,"run",3)) ravito++;
+    Object.keys(f.checked).forEach(k=>{ const [tt,mi,ii]=k.split("-"); if(MENU[tt]?.[mi]?.items[ii]?.[0].includes("chocolat")) choco++; });
+  });
+  return {n:done.length, km, weeksFull, frac:done.filter(d=>PLAN[d].kind==="frac").length,
+    sl15:done.some(d=>PLAN[d].km>=15&&PLAN[d].kind==="sl"), race:done.some(d=>PLAN[d].kind==="race"),
+    days:logged.length, best, perfect, bfast, ravito, choco, meals:S.templates.filter(t=>t.kind==="meal").length, measures:S.measures.length};
+}
+// Petite rosette festonnée avec une illustration au centre
+function rosette(col, soft, inner, size=64){
+  const sc=[...Array(14)].map((_,i)=>{ const a=i/14*Math.PI*2; return `<circle cx="${32+Math.cos(a)*25}" cy="${32+Math.sin(a)*25}" r="7" fill="${soft}"/>`; }).join("");
+  return `<svg viewBox="0 0 64 64" width="${size}" height="${size}">${sc}<circle cx="32" cy="32" r="25" fill="${soft}"/><circle cx="32" cy="32" r="20" fill="#fff" stroke="${col}" stroke-width="2" stroke-dasharray="3 3"/>
+    <foreignObject x="17" y="17" width="30" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="width:30px;height:30px;display:grid;place-items:center">${inner}</div></foreignObject></svg>`;
+}
+const num = (t,c)=>`<span style="font:800 ${t.length>2?12:15}px var(--f-title);color:${c}">${t}</span>`;
+const ico = (svg,w=24)=>`<span style="display:block;width:${w}px">${svg}</span>`;
+const BADGES = [
+  // --- Course ---
+  {id:"r1", g:"Course", n:"Premier pas", d:"Ta toute première séance cochée", c:"#C9654B", s:"#F8E1D7", i:()=>ico(D.shoe(),26), p:x=>[x.n,1]},
+  {id:"r2", g:"Course", n:"Semaine parfaite", d:"Toutes les séances d'une semaine faites", c:"#D9A43A", s:"#FBF0D3", i:()=>ico(D.sun()), p:x=>[x.weeksFull,1]},
+  {id:"r3", g:"Course", n:"Dix séances", d:"10 séances cochées", c:"#D27891", s:"#F9E3E9", i:()=>num("10","#D27891"), p:x=>[x.n,10]},
+  {id:"r4", g:"Course", n:"50 km", d:"50 km courus depuis le début de la prépa", c:"#6F9A6A", s:"#E4EFE0", i:()=>num("50","#6F9A6A"), p:x=>[Math.round(x.km),50]},
+  {id:"r5", g:"Course", n:"Cap des 15 km", d:"Ta première sortie longue de 15 km", c:"#C9654B", s:"#F8E1D7", i:()=>num("15","#C9654B"), p:x=>[x.sl15?1:0,1]},
+  {id:"r6", g:"Course", n:"Un mois en béton", d:"4 semaines complètes", c:"#3E63A6", s:"#E1E9F6", i:()=>ico(D.heart("#9DB4DD")), p:x=>[x.weeksFull,4]},
+  {id:"r7", g:"Course", n:"100 km", d:"100 km courus, trois chiffres !", c:"#8A7BC4", s:"#ECE8F7", i:()=>num("100","#8A7BC4"), p:x=>[Math.round(x.km),100]},
+  {id:"r8", g:"Course", n:"Reine du fractionné", d:"8 séances de qualité faites (VMA, seuil, 10k)", c:"#D27891", s:"#F9E3E9", i:()=>ico(D.sparkle("#D27891"),22), p:x=>[x.frac,8]},
+  {id:"r9", g:"Course", n:"200 km", d:"200 km courus pendant la prépa", c:"#D9A43A", s:"#FBF0D3", i:()=>num("200","#B98A2A"), p:x=>[Math.round(x.km),200]},
+  {id:"r10",g:"Course", n:"Finisheuse", d:"Semi-marathon de Paris terminé 🏅", c:"#8A7BC4", s:"#ECE8F7", i:()=>ico(D.medal(),22), p:x=>[x.race?1:0,1]},
+  // --- Assiette ---
+  {id:"f1", g:"Assiette", n:"Première assiette", d:"Ta première journée notée", c:"#6F9A6A", s:"#E4EFE0", i:()=>ico(D.bowl(),26), p:x=>[x.days,1]},
+  {id:"f2", g:"Assiette", n:"Assiette parfaite", d:"Tout ton programme suivi sur une journée", c:"#C9654B", s:"#F8E1D7", i:()=>ico(MEALIC.plate), p:x=>[x.perfect,1]},
+  {id:"f3", g:"Assiette", n:"Ravito au top", d:"Collation avant et après la séance, un jour de course", c:"#D9A43A", s:"#FBF0D3", i:()=>ico(MEALIC.banana), p:x=>[x.ravito,1]},
+  {id:"f4", g:"Assiette", n:"Petit-déj de championne", d:"7 petits-déjeuners complets", c:"#D27891", s:"#F9E3E9", i:()=>ico(MEALIC.bfast), p:x=>[x.bfast,7]},
+  {id:"f5", g:"Assiette", n:"Régulière", d:"7 jours notés d'affilée", c:"#3E63A6", s:"#E1E9F6", i:()=>num("7","#3E63A6"), p:x=>[x.best,7]},
+  {id:"f6", g:"Assiette", n:"Cheffe", d:"3 repas types créés", c:"#8A7BC4", s:"#ECE8F7", i:()=>ico(D.cherry(),24), p:x=>[x.meals,3]},
+  {id:"f7", g:"Assiette", n:"Chocolat mérité", d:"10 carrés de chocolat du soir savourés", c:"#9A6A4E", s:"#F1E4DA", i:()=>`<svg viewBox="0 0 24 24" width="22"><rect x="3" y="5" width="18" height="14" rx="2" fill="#7A4B35"/><path d="M9 5v14M15 5v14M3 12h18" stroke="#5E3726" stroke-width="1.5"/></svg>`, p:x=>[x.choco,10]},
+  {id:"f8", g:"Assiette", n:"Carnet fidèle", d:"30 jours notés", c:"#6F9A6A", s:"#E4EFE0", i:()=>num("30","#6F9A6A"), p:x=>[x.days,30]},
+  // --- Suivi ---
+  {id:"s1", g:"Suivi", n:"Point de départ", d:"Ta première mesure enregistrée", c:"#D27891", s:"#F9E3E9", i:()=>ico(D.tape(),26), p:x=>[x.measures,1]},
+  {id:"s2", g:"Suivi", n:"Bien suivie", d:"4 mesures (2 mois de suivi)", c:"#6F9A6A", s:"#E4EFE0", i:()=>ico(D.leaf()), p:x=>[x.measures,4]},
+];
+const unlocked = x=>BADGES.filter(b=>{ const [v,t]=b.p(x); return v>=t; });
+let LOADED=false;
+// Vérifie les nouveaux badges après chaque changement et fait la fête
+function checkBadges(){
+  if(!LOADED) return;
+  const now=unlocked(bstats()).map(b=>b.id);
+  if(!Array.isArray(S.settings.badges)){ S.settings.badges=now; save("state"); return; }   // premier lancement : pas de fête pour l'existant
+  const fresh=now.filter(id=>!S.settings.badges.includes(id));
+  if(!fresh.length) return;
+  S.settings.badges=[...S.settings.badges,...fresh]; save("state");
+  const b=BADGES.find(x=>x.id===fresh[0]);
+  setTimeout(()=>{
+    if(document.querySelector(".sheet input")){ toast(`Nouveau badge : ${b.n} 🎉`); return; }   // ne coupe pas une saisie en cours
+    sheet(`<div style="text-align:center;padding:10px 0 4px"><div class="eyebrow">Nouveau badge ${fresh.length>1?`(+${fresh.length-1} autre${fresh.length>2?"s":""})`:""}</div>
+      <div class="badgebig">${rosette(b.c,b.s,b.i(),150)}</div><h2 style="justify-content:center;margin:6px 0 4px">${b.n}</h2><div class="muted">${b.d}</div>
+      <button class="btn full" style="margin-top:20px" data-a="badges">Voir tous mes badges</button></div>`);
+    const r=document.querySelector(".badgebig"); for(let i=0;i<3;i++) setTimeout(()=>confetti(r),i*250);
+  },450);
+}
+function badgeStrip(){
+  const x=bstats(), got=unlocked(x), ids=got.map(b=>b.id);
+  const next=BADGES.filter(b=>!ids.includes(b.id)).map(b=>({b,r:b.p(x)[0]/b.p(x)[1]})).sort((a,b)=>b.r-a.r)[0];
+  const show=[...got].reverse().slice(0,4);
+  return `<button class="card" style="width:100%;text-align:left" data-a="badges">
+    <div class="row between"><b style="font:650 16px var(--f-title)">${got.length} / ${BADGES.length} badges</b><span class="muted" style="font-size:13px">Tout voir →</span></div>
+    <div class="bstrip">${show.map((b,i)=>`<span class="bmini" style="animation-delay:${i*.08}s">${rosette(b.c,b.s,b.i(),58)}</span>`).join("")||`<span class="muted" style="font-size:13.5px;padding:8px 0">Ton premier badge t'attend ✨</span>`}</div>
+    ${next?`<div style="font-size:13px;margin-top:6px">Prochain : <b>${next.b.n}</b> <span class="muted">· ${next.b.d.toLowerCase()}</span></div>
+      <div class="bar" style="height:7px"><i data-bar="nextb" data-to="${Math.min(next.r,1)*100}"></i></div>`:""}
+  </button>`;
+}
+function badgesSheet(){
+  const x=bstats(), ids=unlocked(x).map(b=>b.id);
+  sheet(`<h2>${deco(D.medal(),"bob","width:22px")} Mes badges</h2><div class="muted" style="font-size:13.5px">${ids.length} sur ${BADGES.length} débloqués</div>
+    ${["Course","Assiette","Suivi"].map(g=>`<div class="sec">${g}</div><div class="bgrid">${BADGES.filter(b=>b.g===g).map((b,i)=>{ const on=ids.includes(b.id), [v,t]=b.p(x);
+      return `<div class="bcell ${on?"":"locked"}" style="animation-delay:${i*.04}s">${rosette(b.c,b.s,b.i(),68)}<b>${b.n}</b><span>${on?b.d:t>1?`${Math.min(v,t)} / ${t}`:b.d}</span>
+        ${!on&&t>1?`<div class="bar" style="height:5px;margin-top:4px"><i style="width:${Math.min(v/t,1)*100}%;background:${b.c}"></i></div>`:""}</div>`; }).join("")}</div>`).join("")}`);
+}
+
 /* --- Réglages --- */
-const goalTxt = ()=>{ const g=S.settings.goal||150; return `${Math.floor(g/60)}h${String(g%60).padStart(2,"0")}`; };
 function settingsSheet(){
   sheet(`<h2>${deco(D.flower(),"spin","width:24px")} Réglages</h2>
-    <div class="form"><div class="field wide"><label>Objectif au semi (h:mm)</label><input id="sg" value="${goalTxt().replace("h",":")}" inputmode="numeric"></div>
+    <div class="form">
     <div class="field wide"><label>Poids de référence si aucune mesure (kg)</label><input id="sw" type="number" inputmode="decimal" value="${S.settings.weight||""}" placeholder="60"></div></div>
-    <div class="muted" style="font-size:12.5px;margin-top:8px">Allure semi actuelle : <b>${paces().AS}</b> · endurance ${paces().EF}</div>
     <button class="btn full" style="margin-top:14px" data-a="saveset">Enregistrer</button>
     ${sb?`<button class="btn ghost full" style="margin-top:8px" data-a="logout">Se déconnecter</button>`:`<p class="note">Mode aperçu : les données restent sur ce téléphone.</p>`}`);
 }
@@ -820,7 +975,8 @@ const A = {
     save("measure:"+day); render(); toast("Mesure enregistrée 🌷"); confetti(document.querySelector('[data-a="addm"]')||document.body); },
   delm:b=>{ S.measures=S.measures.filter(x=>x.day!==b.dataset.d); save("measure:"+b.dataset.d); render(); },
   settings:()=>settingsSheet(),
-  saveset:()=>{ const g=document.getElementById("sg").value.match(/(\d+)\D*(\d{0,2})/); if(g){ S.settings.goal=(+g[1])*60+(+(g[2]||0)); }
+  badges:()=>badgesSheet(),
+  saveset:()=>{
     const w=parseFloat(document.getElementById("sw").value); if(isFinite(w)) S.settings.weight=w; else delete S.settings.weight;
     save("state"); setPlan(); closeSheet(); render(); toast("Réglages enregistrés"); },
   logout:async ()=>{ closeSheet(); await sb.auth.signOut(); },
@@ -864,14 +1020,14 @@ function showAuth(){
   });
 }
 if(!LIVE){                                  // aperçu : données sur le téléphone seulement
-  fromCache("demo"); startApp();
+  fromCache("demo"); LOADED=true; startApp();
 } else {
   sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   sb.auth.onAuthStateChange((ev,session)=>{
     const u=session?.user||null;
     if(u && (!ME||ME.id!==u.id)){ ME=u; setTimeout(async ()=>{
       const had=fromCache(u.id); if(had) startApp();
-      try{ await load(); setPlan(); if(had) render(); else startApp(); }
+      try{ await load(); LOADED=true; setPlan(); if(had) render(); else startApp(); }
       catch(err){ if(!had) document.getElementById("view").innerHTML=`<div class="loading">Pas de réseau. Réessaie une fois connectée.</div>`; else toast("Hors ligne : dernière copie affichée"); }
     },0); }
     else if(!u){ ME=null; showAuth(); }
