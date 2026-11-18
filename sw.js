@@ -2,8 +2,8 @@
 // - la page : réseau d'abord (pour recevoir les mises à jour), copie locale si pas de réseau
 // - bibliothèque, polices, icônes : copie locale d'abord
 // - données Supabase : jamais mises en cache ici (gérées par l'appli)
-const CACHE = 'objectif-semi-v5';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png',
+const CACHE = 'objectif-semi-v6';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png', './ciqual.json',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'];
 
 self.addEventListener('install', e => {
@@ -16,7 +16,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const req = e.request, url = new URL(req.url);
-  if (req.method !== 'GET' || url.hostname.endsWith('supabase.co')) return;
+  if (req.method !== 'GET' || url.hostname.endsWith('supabase.co') || url.hostname.endsWith('openfoodfacts.org')) return;   // recherche de produits : toujours en direct
   // Page : réseau d'abord
   if (req.mode === 'navigate' || (url.origin === location.origin && url.pathname.endsWith('.html'))) {
     e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return r; })

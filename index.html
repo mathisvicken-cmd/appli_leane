@@ -235,6 +235,26 @@ button.mini::before{content:"";position:absolute;inset:-12px}
 .grp .gb em{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:2px;background:var(--ink);opacity:.35}
 .grp .gv{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
 .tipline{margin-top:10px;font-size:13px;padding:9px 12px;border-radius:12px;background:var(--butter-soft)}
+.macros{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:12px;color:var(--muted)}
+.macros b{color:var(--ink);font-size:13px}
+.sugg{margin:2px 16px 8px;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,var(--butter-soft),#FFF8E8);border:1px dashed #EBD49A}
+.sugg .sh{font-size:13px}
+.sugg .sh span{color:var(--muted);font-size:12px}
+.sgl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sg{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border-radius:99px;background:#fff;border:1px solid #EBD49A;font-size:13px;font-weight:600}
+.sg small{color:var(--muted);font-weight:500;margin-left:2px}
+.photobtn{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:14px;background:var(--lav-soft);color:var(--lav);font-weight:700;font-size:14px;cursor:pointer;flex:none}
+.offbtn{display:block;width:100%;margin:12px 0 4px;padding:11px;border-radius:14px;border:1.5px dashed #D8C9BC;color:var(--muted);font-weight:600;font-size:13.5px}
+.phl{margin-top:10px}
+.phr{display:grid;grid-template-columns:28px 1fr 62px 14px 44px;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--line);transition:opacity .2s}
+.phr.off{opacity:.4}
+.phc{width:24px;height:24px;border-radius:8px;background:var(--lav);display:grid;place-items:center}
+.phr.off .phc{background:transparent;border:2px solid #D8C9BC}
+.phn b{display:block;font-size:14px;font-weight:600}
+.phn small{display:block;font-size:11.5px;color:var(--muted)}
+.phg{width:100%;padding:8px 6px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:15px;text-align:center}
+.phu{font-size:12px;color:var(--muted)}
+.phk{font-size:12.5px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
 .favbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:99px;background:var(--lav-soft);color:var(--lav);font-weight:650;font-size:13px}
 
 /* ---------- Suivi ---------- */
@@ -342,30 +362,30 @@ const uid = ()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 // [libellé, kcal, famille, surligné]
 const MENU = {
   run: [
-    {m:"Petit-déjeuner", ic:"bfast", items:[["2 œufs",150,"prot"],["60 g pain complet",147,"fec"],["30 g St Moret léger",45,"lait"],["1 fruit",70,"fruit"]]},
-    {m:"Déjeuner", ic:"plate", items:[["Légumes à volonté",60,"leg"],["10 g huile",90,"gras"],["120 g protéines",180,"prot"],["200 g féculents cuits",270,"fec",1],["100 g fromage blanc",50,"lait"]]},
-    {m:"1 h avant la séance", ic:"banana", items:[["1 banane",100,"fruit"],["15 g amandes",90,"gras"]]},
-    {m:"Après la séance", ic:"skyr", items:[["150 g skyr",90,"lait"],["1 fruit",70,"fruit"]]},
-    {m:"Dîner", ic:"moon", items:[["200–300 g légumes",75,"leg"],["10 g huile",90,"gras"],["120 g protéines",180,"prot"],["150 g féculents cuits",200,"fec",1],["20 g chocolat noir",115,"plaisir"]]},
+    {m:"Petit-déjeuner", ic:"bfast", items:[["2 œufs",150,"prot",0,[14,0.6,11]],["60 g pain complet",147,"fec",0,[5.4,26,1.5]],["30 g St Moret léger",45,"lait",0,[2.7,1.5,3.3]],["1 fruit",70,"fruit",0,[0.8,16,0.3]]]},
+    {m:"Déjeuner", ic:"plate", items:[["Légumes à volonté",60,"leg",0,[3,9,0.6]],["10 g huile",90,"gras",0,[0,0,10]],["120 g protéines",180,"prot",0,[36,0,3.6]],["200 g féculents cuits",270,"fec",1,[8,58,1.2]],["100 g fromage blanc",50,"lait",0,[7.5,4,0.2]]]},
+    {m:"1 h avant la séance", ic:"banana", items:[["1 banane",100,"fruit",0,[1.2,23,0.3]],["15 g amandes",90,"gras",0,[3.2,1.2,8]]]},
+    {m:"Après la séance", ic:"skyr", items:[["150 g skyr",90,"lait",0,[15,6,0.3]],["1 fruit",70,"fruit",0,[0.8,16,0.3]]]},
+    {m:"Dîner", ic:"moon", items:[["200–300 g légumes",75,"leg",0,[4.5,10,0.7]],["10 g huile",90,"gras",0,[0,0,10]],["120 g protéines",180,"prot",0,[36,0,3.6]],["150 g féculents cuits",200,"fec",1,[6,44,0.9]],["20 g chocolat noir",115,"plaisir",0,[1.6,6.6,8.4]]]},
   ],
   rest: [
-    {m:"Petit-déjeuner", ic:"bfast", items:[["2 œufs",150,"prot"],["60 g pain complet",147,"fec"],["30 g St Moret léger",45,"lait"],["1 fruit",70,"fruit"]]},
-    {m:"Déjeuner", ic:"plate", items:[["Légumes à volonté",60,"leg"],["10 g huile",90,"gras"],["120 g protéines",180,"prot"],["150 g féculents cuits",200,"fec",1],["100 g fromage blanc",50,"lait"]]},
-    {m:"Goûter", ic:"skyr", items:[["150 g skyr",90,"lait"],["1 fruit (ou fruit + 15 g amandes)",70,"fruit"]]},
-    {m:"Dîner", ic:"moon", items:[["200–300 g légumes",75,"leg"],["10 g huile",90,"gras"],["120 g protéines",180,"prot"],["50–80 g féculents cuits",90,"fec",1],["20 g chocolat noir",115,"plaisir"]]},
+    {m:"Petit-déjeuner", ic:"bfast", items:[["2 œufs",150,"prot",0,[14,0.6,11]],["60 g pain complet",147,"fec",0,[5.4,26,1.5]],["30 g St Moret léger",45,"lait",0,[2.7,1.5,3.3]],["1 fruit",70,"fruit",0,[0.8,16,0.3]]]},
+    {m:"Déjeuner", ic:"plate", items:[["Légumes à volonté",60,"leg",0,[3,9,0.6]],["10 g huile",90,"gras",0,[0,0,10]],["120 g protéines",180,"prot",0,[36,0,3.6]],["150 g féculents cuits",200,"fec",1,[6,44,0.9]],["100 g fromage blanc",50,"lait",0,[7.5,4,0.2]]]},
+    {m:"Goûter", ic:"skyr", items:[["150 g skyr",90,"lait",0,[15,6,0.3]],["1 fruit (ou fruit + 15 g amandes)",70,"fruit",0,[0.8,16,0.3]]]},
+    {m:"Dîner", ic:"moon", items:[["200–300 g légumes",75,"leg",0,[4.5,10,0.7]],["10 g huile",90,"gras",0,[0,0,10]],["120 g protéines",180,"prot",0,[36,0,3.6]],["50–80 g féculents cuits",90,"fec",1,[2.6,19,0.4]],["20 g chocolat noir",115,"plaisir",0,[1.6,6.6,8.4]]]},
   ]
 };
 const target = t => MENU[t].reduce((s,x)=>s+x.items.reduce((a,i)=>a+i[1],0),0);
-// [nom, kcal, unité, famille] : "g" = kcal pour 100 g, "u" = kcal par unité / portion
+// [nom, kcal, unité, famille, [protéines, glucides, lipides] en g] : "g" = kcal pour 100 g, "u" = kcal par unité / portion
 const FOODS = [
- ["Riz cuit",130,"g","fec"],["Pâtes cuites",150,"g","fec"],["Quinoa cuit",120,"g","fec"],["Pommes de terre cuites",85,"g","fec"],["Patate douce cuite",90,"g","fec"],["Lentilles cuites",115,"g","fec"],
- ["Pain complet",245,"g","fec"],["Pain blanc / baguette",270,"g","fec"],["Flocons d'avoine",370,"g","fec"],
- ["Blanc de poulet cuit",150,"g","prot"],["Poisson blanc",100,"g","prot"],["Saumon",200,"g","prot"],["Thon en boîte",115,"g","prot"],["Steak haché 5 %",130,"g","prot"],["Tofu",120,"g","prot"],["Jambon blanc",110,"g","prot"],["Crevettes",100,"g","prot"],
- ["Œuf",75,"u","prot"],["Fromage blanc 0 %",45,"g","lait"],["Skyr",60,"g","lait"],["Yaourt nature",60,"u","lait"],["St Moret léger",150,"g","lait"],["Emmental / comté",390,"g","lait"],["Mozzarella",250,"g","lait"],["Feta",265,"g","lait"],["Lait demi-écrémé",46,"g","lait"],
- ["Légumes (moyenne)",30,"g","leg"],["Salade verte",15,"g","leg"],["Soupe de légumes (bol)",90,"u","leg"],["Haricots verts / brocolis",30,"g","leg"],["Avocat",160,"g","gras"],["Banane",100,"u","fruit"],["Pomme",75,"u","fruit"],["Fruit (moyen)",70,"u","fruit"],["Compote sans sucre",55,"u","fruit"],["Fruits rouges",45,"g","fruit"],
- ["Amandes",600,"g","gras"],["Noix",680,"g","gras"],["Chocolat noir 70 %",570,"g","plaisir"],["Huile d'olive",900,"g","gras"],["Beurre de cacahuète",600,"g","gras"],["Miel",320,"g","plaisir"],["Confiture",250,"g","plaisir"],
- ["Croissant",230,"u","plaisir"],["Pain au chocolat",270,"u","plaisir"],["Part de pizza",280,"u","autre"],["Burger",500,"u","autre"],["Sushi / maki (pièce)",45,"u","autre"],["Barre de céréales",100,"u","plaisir"],["Part de gâteau",350,"u","plaisir"],
- ["Verre de vin",85,"u","plaisir"],["Bière 25 cl",105,"u","plaisir"],["Jus d'orange (verre)",90,"u","fruit"],["Gel énergétique",90,"u","autre"],["Boisson sport 50 cl",120,"u","autre"]
+ ["Riz cuit",130,"g","fec",[2.7,28,0.3]],["Pâtes cuites",150,"g","fec",[5,30,0.9]],["Quinoa cuit",120,"g","fec",[4.4,21,1.9]],["Pommes de terre cuites",85,"g","fec",[2,19,0.1]],["Patate douce cuite",90,"g","fec",[1.6,20,0.1]],["Lentilles cuites",115,"g","fec",[9,17,0.4]],
+ ["Pain complet",245,"g","fec",[9,43,2.5]],["Pain blanc / baguette",270,"g","fec",[9,56,1.2]],["Flocons d'avoine",370,"g","fec",[13,60,7]],
+ ["Blanc de poulet cuit",150,"g","prot",[30,0,3]],["Poisson blanc",100,"g","prot",[20,0,1]],["Saumon",200,"g","prot",[22,0,13]],["Thon en boîte",115,"g","prot",[26,0,1]],["Steak haché 5 %",130,"g","prot",[21,0,5]],["Tofu",120,"g","prot",[13,2,7]],["Jambon blanc",110,"g","prot",[20,1,3]],["Crevettes",100,"g","prot",[22,0,1.5]],
+ ["Œuf",75,"u","prot",[7,0.3,5.5]],["Fromage blanc 0 %",45,"g","lait",[7.5,4,0.2]],["Skyr",60,"g","lait",[10,4,0.2]],["Yaourt nature",60,"u","lait",[5,6,1.5]],["St Moret léger",150,"g","lait",[9,5,11]],["Emmental / comté",390,"g","lait",[28,0,30]],["Mozzarella",250,"g","lait",[18,1,19]],["Brie / camembert",300,"g","lait",[20,0.5,24]],["Fromage de chèvre",270,"g","lait",[18,1,21]],["Raclette / gruyère",370,"g","lait",[27,0,29]],["Feta",265,"g","lait",[15,1,21]],["Lait demi-écrémé",46,"g","lait",[3.2,4.8,1.5]],
+ ["Légumes (moyenne)",30,"g","leg",[1.8,4,0.3]],["Salade verte",15,"g","leg",[1.3,1.5,0.2]],["Soupe de légumes (bol)",90,"u","leg",[3,12,3.5]],["Haricots verts / brocolis",30,"g","leg",[2.5,4,0.3]],["Avocat",160,"g","gras",[2,2,15]],["Banane",100,"u","fruit",[1.2,23,0.3]],["Pomme",75,"u","fruit",[0.4,19,0.3]],["Fruit (moyen)",70,"u","fruit",[0.8,16,0.3]],["Compote sans sucre",55,"u","fruit",[0.3,13,0.1]],["Fruits rouges",45,"g","fruit",[1,9,0.4]],
+ ["Amandes",600,"g","gras",[21,8,53]],["Noix",680,"g","gras",[15,7,65]],["Chocolat noir 70 %",570,"g","plaisir",[8,33,42]],["Huile d'olive",900,"g","gras",[0,0,100]],["Beurre de cacahuète",600,"g","gras",[25,15,50]],["Miel",320,"g","plaisir",[0.3,80,0]],["Confiture",250,"g","plaisir",[0.4,60,0.1]],
+ ["Croissant",230,"u","plaisir",[4.5,25,12]],["Pain au chocolat",270,"u","plaisir",[5,30,15]],["Part de pizza",280,"u","autre",[12,32,10]],["Burger",500,"u","autre",[25,40,22]],["Sushi / maki (pièce)",45,"u","autre",[1.8,8,0.6]],["Barre de céréales",100,"u","plaisir",[1.5,16,3]],["Part de gâteau",350,"u","plaisir",[4,45,17]],
+ ["Verre de vin",85,"u","plaisir",[0,2.5,0]],["Bière 25 cl",105,"u","plaisir",[1,8,0]],["Jus d'orange (verre)",90,"u","fruit",[1.4,20,0.4]],["Gel énergétique",90,"u","autre",[0,22,0]],["Boisson sport 50 cl",120,"u","autre",[0,30,0]]
 ];
 
 /* =====================================================================
@@ -496,6 +516,7 @@ function save(key){                    // "state" | "food:2026-11-18" | "measure
   }, 600);
 }
 async function saveTpl(t, del){
+  AF=null;
   if(del) S.templates = S.templates.filter(x=>x.id!==t.id);
   else { const i=S.templates.findIndex(x=>x.id===t.id); if(i<0) S.templates.push(t); else S.templates[i]=t; }
   cache();
@@ -543,13 +564,14 @@ const CATS = {
 const CAT_ORDER=["prot","fec","leg","lait","fruit","gras","plaisir"];
 function guessCat(name){
   const n=" "+norm(name)+" ", has=(...w)=>w.some(x=>n.includes(x));
-  if(has("legume","salade","brocoli","haricot vert","courgette","carotte","tomate","soupe")) return "leg";
-  if(has("feculent","riz","pate","quinoa","pomme de terre","patate","semoule","boulgour","pain","avoine","lentille")) return "fec";
-  if(has("proteine","oeuf","poulet","dinde","poisson","saumon","thon","cabillaud","tofu","jambon","steak","boeuf","crevette","viande")) return "prot";
-  if(has("fromage blanc","skyr","yaourt","yogourt","st moret","lait ","fromage","mozzarella","feta","comte","emmental")) return "lait";
-  if(has("chocolat","gateau","biscuit","croissant","pain au chocolat","bonbon","glace","vin","biere","miel","confiture","cookie")) return "plaisir";
-  if(has("fruit","banane","pomme","poire","orange","clementine","kiwi","fraise","framboise","compote","raisin","mangue")) return "fruit";
-  if(has("huile","amande","noix","noisette","avocat","beurre","cacahuete")) return "gras";
+  if(has("pain au chocolat","pate a tartiner","nutella","croissant","brioche","gateau","biscuit","cookie","tarte","gaufre","crepe","macaron","bonbon","glace","soda","coca","chips","viennoiserie","chocolat")) return "plaisir";
+  if(has("legume","salade","brocoli","haricot vert","courgette","carotte","tomate","soupe","epinard","poivron","aubergine","champignon","concombre","chou","poireau","petits pois","asperge","radis","betterave","ratatouille")) return "leg";
+  if(has("fromage blanc","skyr","yaourt","yogourt","st moret","lait ","fromage","mozzarella","feta","comte","emmental","brie","camembert","chevre","roquefort","raclette","parmesan","gruyere","ricotta","mascarpone","cottage","kefir","petit suisse")) return "lait";
+  if(has("feculent","riz","pate","quinoa","pomme de terre","patate","semoule","boulgour","pain","avoine","lentille","couscous","tortilla","wrap","polenta","gnocchi","cereale","muesli","granola","pois chiche","haricot rouge","galette")) return "fec";
+  if(has("proteine","oeuf","poulet","dinde","poisson","saumon","thon","cabillaud","tofu","jambon","steak","boeuf","crevette","viande","porc","veau","agneau","canard","merlu","colin","sardine","maquereau","seitan","tempeh")) return "prot";
+  if(has("vin","biere","miel","confiture","sucre","sirop")) return "plaisir";
+  if(has("fruit","banane","pomme","poire","orange","clementine","kiwi","fraise","framboise","compote","raisin","mangue","abricot","peche","ananas","melon","pasteque","myrtille","cerise","datte","figue")) return "fruit";
+  if(has("huile","amande","noix","noisette","avocat","beurre","cacahuete","olive","graine")) return "gras";
   return "autre";
 }
 // Ancien format (cases cochées) → converti une fois en aliments mangés
@@ -583,6 +605,46 @@ function compareMeal(meal, ents){
 }
 const VERD = {none:["Pas encore noté","#F1EAE2","var(--muted)"], pile:["Comme le programme ✨","var(--sage-soft)","var(--sage)"], proche:["Proche du programme","var(--butter-soft)","#B98A2A"], loin:["Différent du programme","var(--rose-soft)","var(--rose)"]};
 const STI = {ok:["✓","var(--sage)"], less:["un peu moins","#B98A2A"], more:["un peu plus","var(--rose)"], missing:["pas encore","var(--muted)"], extra:["en plus","var(--lav)"]};
+// Protéines / glucides / lipides d'un aliment noté : valeurs connues, sinon estimées d'après sa famille
+const MAC=["protéines","glucides","lipides"];
+const SHARE={prot:[.55,.05,.40],fec:[.13,.80,.07],leg:[.25,.65,.10],lait:[.45,.25,.30],fruit:[.05,.92,.03],gras:[.08,.12,.80],plaisir:[.06,.50,.44],autre:[.18,.45,.37]};
+const CHEESE=/brie|camembert|chevre|roquefort|raclette|parmesan|gruyere|comte|emmental|fromage(?! blanc)|feta|mozzarella/;
+const estMacros=(k,c,name="")=>{ const s=(c==="lait"&&CHEESE.test(norm(name)))?[.27,.02,.71]:(SHARE[c]||SHARE.autre); return [k*s[0]/4,k*s[1]/4,k*s[2]/9]; };
+function entryMacros(x){ if(x.bm){ const f=x.u==="g"?(+x.q||0)/100:(+x.q||0); return x.bm.map(v=>v*f); } return estMacros(+x.k||0,x.c,x.base||x.n); }
+const sum3=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const planMacros=items=>items.reduce((a,i)=>sum3(a,i[4]||estMacros(i[1],i[2])),[0,0,0]);
+const entsMacros=ents=>ents.reduce((a,x)=>sum3(a,entryMacros(x)),[0,0,0]);
+const LIGHT_FOODS=["Œuf","Skyr","Fromage blanc 0 %","Yaourt nature","Jambon blanc","Lait demi-écrémé","Flocons d'avoine","Pain complet","Banane","Fruit (moyen)","Pomme","Fruits rouges","Compote sans sucre","Amandes","Noix","Beurre de cacahuète","St Moret léger"];
+// Propose 1 à 3 aliments pour combler ce qui manque au repas (jamais pour retirer)
+function suggest(meal, ents){
+  if(!ents.length) return {list:[],need:[0,0,0]};
+  const T=planMacros(meal.items), E=entsMacros(ents);
+  const eatenK=ents.reduce((a,x)=>a+(+x.k||0),0), tgK=meal.items.reduce((a,i)=>a+i[1],0);
+  const TH=[5,12,5], need=[0,1,2].map(j=>{ const d=T[j]-E[j]; return d>=TH[j]&&d>=T[j]*0.2?d:0; });
+  if(eatenK>=tgK*1.1 || !need.some(Boolean)) return {list:[],need};
+  const cmp=compareMeal(meal,ents), low=new Set(cmp.rows.filter(r=>r.st==="missing"||r.st==="less").map(r=>r.c)), inMeal=new Set(meal.items.map(i=>i[2]));
+  const have=new Set(ents.map(x=>norm(x.base||x.n)));
+  const order=[0,1,2].filter(j=>need[j]).sort((a,b)=>need[b]/T[b]-need[a]/T[a]);
+  const foods=allFoods(), out=[], used=new Set(), light=/petit|goûter|avant|après/i.test(meal.m);   // petit-déj et collations : aliments qui s'y prêtent
+  order.forEach((j,rank)=>{
+    const cands=foods.map((f,fi)=>({f,fi})).filter(({f})=>f.m && !f.src && !["plaisir","autre"].includes(f.c) && !used.has(f.n) && (!light || f.fav || LIGHT_FOODS.includes(f.n)))
+      .map(o=>{ const m=o.f.m, kc=m[0]*4+m[1]*4+m[2]*9||1; return {...o, share:m[j]*(j===2?9:4)/kc}; })
+      .filter(o=>o.share>=(j===0?0.35:0.6))
+      .map(o=>({...o, score:o.share+(o.f.fav?0.6:0)+(low.has(o.f.c)?0.7:0)+(inMeal.has(o.f.c)?0.3:0)+(have.has(norm(o.f.n))?0.9:0)}))
+      .sort((a,b)=>b.score-a.score);
+    let n=0; const take=rank===0?2:1;
+    for(const o of cands){ if(out.length>=3||n>=take) break;
+      const f=o.f, per=f.m[j]||1; let q;
+      const cap=f.c==="gras"?20:(f.c==="lait"&&(CHEESE.test(norm(f.n))||/moret/.test(norm(f.n))))?40:200;   // portions raisonnables
+      if(f.u==="g"){ q=Math.round(need[j]/per*100/10)*10; q=Math.max(10,Math.min(q,cap)); }
+      else { q=Math.min(3,Math.max(1,Math.round(need[j]/per))); }   // aliments à l'unité : nombres entiers
+      const room=Math.max(tgK-eatenK,60)*1.2;                          // ne pas dépasser ce qui reste prévu pour ce repas
+      while(kcalOf(f,q)>room && q>(f.u==="g"?10:1)) q=f.u==="g"?q-10:q-1;
+      const k=kcalOf(f,q); if(k>room*1.3) continue;
+      out.push({j,fi:o.fi,f,q,k}); used.add(f.n); n++; }
+  });
+  return {list:out,need};
+}
 function dayCompare(d){
   const t=dayType(d), meals=MENU[t].map(m=>compareMeal(m,mealEnts(d,m)));
   const T={}, E={}; MENU[t].forEach(m=>m.items.forEach(i=>T[i[2]]=(T[i[2]]||0)+i[1])); (S.food[d]?.extras||[]).forEach(x=>E[x.c]=(E[x.c]||0)+(+x.k||0));
@@ -606,13 +668,29 @@ function dayTips(c){
 }
 
 const daysTo = ()=>Math.max(0,Math.round((pd(RACE)-pd(TODAY))/864e5));
-function allFoods(){  // ses aliments enregistrés d'abord, puis le catalogue
-  return [...S.templates.filter(t=>t.kind==="food").map(t=>({n:t.name,k:t.data.kcal,u:t.data.unit,c:t.data.cat||guessCat(t.name),fav:t.id})), ...FOODS.map(f=>({n:f[0],k:f[1],u:f[2],c:f[3]||"autre"}))];
+// Table Ciqual de l'ANSES (≈ 3 300 aliments, chaque mode de cuisson à part), chargée depuis ciqual.json
+let CQ=[], AF=null;
+function loadCiqual(){
+  fetch("ciqual.json").then(r=>r.ok?r.json():[]).then(d=>{
+    CQ=d.map(x=>({n:x[0],k:x[1],u:"g",m:[x[2],x[3],x[4]],c:x[5],src:"cq"})); CQ.forEach(f=>f.key=fkey(f.n)); AF=null;
+    if(document.getElementById("addlist")) document.getElementById("addlist").innerHTML=addList();
+  }).catch(()=>{});
 }
+function allFoods(){  // ses aliments enregistrés d'abord, puis les aliments courants, puis la table Ciqual
+  if(!AF){ AF=[...S.templates.filter(t=>t.kind==="food").map(t=>({n:t.name,k:t.data.kcal,u:t.data.unit,c:t.data.cat||guessCat(t.name),m:t.data.m||null,fav:t.id})), ...FOODS.map(f=>({n:f[0],k:f[1],u:f[2],c:f[3]||"autre",m:f[4]})), ...CQ];
+    AF.forEach(f=>{ if(!f.key) f.key=fkey(f.n); }); }
+  return AF;
+}
+const fkey = n=>" "+norm(n).split(" ").map(stem).join(" ");
 const norm = s=>String(s).toLowerCase().replace(/œ/g,"oe").replace(/æ/g,"ae").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
 const stem = w=>w.length>3?w.replace(/[sx]$/,""):w;
 // "pate", "pates", "pâte" trouvent tous « Pâtes cuites » ; "oeuf" trouve « Œuf »
-const fuzzy = (name,q)=>{ const n=" "+norm(name).split(" ").map(stem).join(" "); return norm(q).split(" ").filter(Boolean).every(w=>n.includes(" "+stem(w))||n.includes(stem(w))); };
+const fuzzy = (name,q,key)=>{ const n=key||fkey(name); return norm(q).split(" ").filter(Boolean).every(w=>n.includes(" "+stem(w))||n.includes(stem(w))); };
+// Classement des résultats : début du nom, mots entiers, « aliment moyen » et « cuit » d'abord, noms courts
+function rank(f,q){ const n=norm(f.n), ws=norm(q).split(" ").filter(Boolean); let s=0;
+  if(n.startsWith(stem(ws[0]||""))) s+=3; ws.forEach(w=>{ if(f.key.includes(" "+stem(w)+" ")||f.key.endsWith(" "+stem(w))) s+=1; });
+  if(/aliment moyen|sans precision/.test(n)) s+=1.2; if(/\bcuit|grille|poele|vapeur|roti/.test(n)) s+=0.6; if(/\bcru\b|sec\b|poudre|deshydrat/.test(n)) s-=0.4;
+  return s-n.length/90; }
 const findFood = n=>allFoods().find(f=>f.n.toLowerCase()===String(n).trim().toLowerCase());
 const kcalOf = (f,q)=>Math.round(f.u==="g"?f.k*q/100:f.k*q);
 
@@ -877,7 +955,8 @@ function foodBody(){
       <div class="muted" style="font-size:12.5px;margin-top:6px">Note ce que tu as mangé : l'appli le compare à ton programme.</div></div></div>
       ${C.logged?`<div class="groups">${CAT_ORDER.filter(c=>C.T[c]).map(c=>{ const r=(C.E[c]||0)/C.T[c], w=Math.min(r,1.5)/1.5*100, K=CATS[c];
         return `<div class="grp"><span class="gl">${K.e} ${K.l}</span><span class="gb"><i data-bar="g${c}" data-to="${w}" style="background:${K.c}"></i><em style="left:${100/1.5}%"></em></span><span class="gv">${Math.round(r*100)} %</span></div>`; }).join("")}
-        <div class="muted" style="font-size:11.5px;margin-top:2px">Le trait = ce que prévoit ton programme pour la journée</div></div>`:""}
+        <div class="muted" style="font-size:11.5px;margin-top:2px">Le trait = ce que prévoit ton programme pour la journée</div></div>
+        <div class="macros">${(()=>{ const T=planMacros(MENU[t].flatMap(m=>m.items)), E=entsMacros(f.extras); return MAC.map((l,j)=>`<span><b>${Math.round(E[j])}</b> / ${Math.round(T[j])} g ${l}</span>`).join(""); })()}</div>`:""}
       ${tips.map(x=>`<div class="tipline">${x}</div>`).join("")}
     </div>
     ${MENU[t].map((meal,mi)=>{
@@ -888,6 +967,9 @@ function foodBody(){
           <div class="pl"><b>Prévu</b> ${meal.items.map(i=>i[3]?`<em>${i[0]}</em>`:i[0]).join(" · ")}</div>
           ${ents.length?`<div class="cmp">${[...cmp.rows,...cmp.extra].map(r=>{ const S2=STI[r.st]; return `<span class="cg" style="--cc:${S2[1]}">${CATS[r.c].e} ${CATS[r.c].l} <b>${S2[0]}</b></span>`; }).join("")}</div>`:""}
         </div>
+        ${(()=>{ if(cmp.verdict==="pile") return ""; const S2=suggest(meal,ents); if(!S2.list.length) return "";
+          const miss=S2.need.map((v,j)=>v?`${Math.round(v)} g de ${MAC[j]}`:"").filter(Boolean).join(" et ");
+          return `<div class="sugg"><div class="sh">💡 <b>Pour compléter</b> <span>il manque ~${miss}</span></div><div class="sgl">${S2.list.map(x=>`<button class="sg" data-a="addsg" data-m="${mi}" data-i="${x.fi}" data-q="${x.q}">${I.plus} ${x.f.u==="g"?`${x.q} g de ${esc(x.f.n.toLowerCase())}`:`${String(x.q).replace(".",",")} × ${esc(x.f.n.toLowerCase())}`}<small>${x.k} kcal</small></button>`).join("")}</div></div>`; })()}
         ${ents.map(x=>`<div class="item extra ${JUST===x.id?"fresh":""}" data-a="editx" data-id="${x.id}" role="button"><span class="box" style="background:${CATS[x.c]?.s||"#F1EAE2"}">${CATS[x.c]?.e||"🍽️"}</span><span class="nm">${esc(x.n)}${x.u==="p"&&x.q!==1?` <small style="display:inline">× ${String(x.q).replace(".",",")}</small>`:""}${x.from?`<small>${esc(x.from)}</small>`:""}</span><span class="k">${x.k} kcal</span><button class="del" data-a="delx" data-id="${x.id}">${I.x}</button></div>`).join("")}
         <div class="mfoot"><div class="row" style="gap:4px">${!ents.length?`<button class="asplan" data-a="asplan" data-m="${mi}">${I.check} Comme prévu</button>`:cmp.rows.some(r=>r.st==="missing")?`<button class="addbtn" data-a="asplan" data-m="${mi}">${I.check} Compléter</button>`:""}<button class="addbtn" data-a="add" data-m="${mi}">${I.plus} Ajouter</button></div>${ents.length?`<button class="savebtn" data-a="saveas" data-m="${mi}">☆ Repas type</button>`:""}</div>
       </div>`;}).join("")}
@@ -914,31 +996,108 @@ function editxSheet(){
 let ADD={meal:"",q:"",pick:null};
 function addList(){
   const q=ADD.q.trim(), meals=S.templates.filter(t=>t.kind==="meal"&&(!q||fuzzy(t.name,q)));
-  const foods=allFoods().map((f,i)=>({...f,i})).filter(f=>!q||fuzzy(f.n,q)), favs=foods.filter(f=>f.fav), cat=foods.filter(f=>!f.fav);
+  const all=allFoods(), favs=[], com=[], cq=[];
+  all.forEach((f,i)=>{ if(q&&!fuzzy(f.n,q,f.key)) return; const o={...f,i}; if(f.fav) favs.push(o); else if(!f.src) com.push(o); else if(q) cq.push(o); });
+  if(q){ cq.sort((a,b)=>rank(b,q)-rank(a,q)); com.sort((a,b)=>rank(b,q)-rank(a,q)); }
+  const nothing=!meals.length&&!favs.length&&!com.length&&!cq.length;
   return `${meals.length?`<div class="sec">${deco(D.heart(),"","width:16px")} Mes repas types</div>${meals.map(m=>`<button class="tplcard" data-a="usetpl" data-id="${m.id}"><b>${esc(m.name)}</b><span>${m.data.items.map(i=>esc(i.n)).join(" · ")} · <b style="font:inherit;color:var(--ink)">${tplK(m)} kcal</b></span></button>`).join("")}`:""}
     ${favs.length?`<div class="sec">${I.star} Mes aliments</div>${favs.map(f=>foodRow(f)).join("")}`:""}
-    <div class="sec">Catalogue</div>${cat.map(f=>foodRow(f)).join("")||`<div class="muted" style="padding:10px 4px">Pas trouvé : utilise la saisie libre juste en dessous ↓</div>`}`;
+    ${com.length?`<div class="sec">Les plus courants</div>${com.map(f=>foodRow(f)).join("")}`:""}
+    ${cq.length?`<div class="sec">Table Ciqual <span class="muted" style="font:500 12px var(--f-body)">· ${cq.length} résultat${cq.length>1?"s":""}, chaque cuisson à part</span></div>${cq.slice(0,60).map(f=>foodRow(f)).join("")}${cq.length>60?`<div class="muted" style="font-size:12.5px;padding:8px 4px">Précise ta recherche pour voir les autres (ex. « riz cuit »)</div>`:""}`:""}
+    ${!q&&!CQ.length?"":!q?`<div class="muted" style="font-size:12.5px;padding:10px 4px">Tape un aliment pour chercher parmi les ${CQ.length.toLocaleString("fr-FR")} aliments de la table Ciqual (cru, cuit, grillé, frit…)</div>`:""}
+    ${q.length>=3?`<button class="offbtn" data-a="off">🔎 Chercher « ${esc(q)} » dans les produits de marque</button><div id="offres"></div>`:""}
+    ${nothing&&q?`<div class="muted" style="padding:10px 4px">Pas trouvé : essaie les produits de marque, la photo, ou la saisie libre en dessous ↓</div>`:""}`;
 }
 function addSheet(){
-  sheet(`<h2>Ajouter · ${esc(ADD.meal)}</h2>
+  sheet(`<div class="row between"><h2 style="margin:4px 0">Ajouter · ${esc(ADD.meal)}</h2>
+      <label class="photobtn">📷 Photo<input type="file" accept="image/*" id="ph" hidden></label></div>
     <input class="search" id="q" placeholder="Chercher un repas ou un aliment…" value="${esc(ADD.q)}" autocomplete="off">
     <div class="addscroll" id="addlist">${addList()}</div>
     <div class="addfree"><div class="sec" style="margin:0 0 6px">Saisie libre</div>
       <div class="freerow"><input id="fn" placeholder="Ce que j'ai mangé" value="${esc(ADD.q)}"><input id="fk" type="number" inputmode="numeric" placeholder="kcal"><button class="btn" data-a="free">${I.plus}</button></div></div>`, false, "tall");
   const inp=document.getElementById("q"), fn=document.getElementById("fn");
   fn.addEventListener("input",()=>fn.dataset.touched=1);
+  document.getElementById("ph").addEventListener("change",e=>{ const f=e.target.files?.[0]; if(f) handlePhoto(f); });
   inp.addEventListener("input",()=>{ ADD.q=inp.value; const l=document.getElementById("addlist"); l.innerHTML=addList(); l.scrollTop=0; if(!fn.dataset.touched) fn.value=inp.value; });
 }
 const tplK = m=>m.data.items.reduce((a,i)=>a+(+i.k||0),0);
-function foodRow(f){ return `<button class="food" data-a="pick" data-i="${f.i}"><span>${f.fav?`<span class="star">${I.star}</span> `:""}${esc(f.n)}</span><small>${f.k} kcal ${f.u==="g"?"/ 100 g":"/ portion"}</small></button>`; }
+function foodRow(f,act="pick"){ return `<button class="food" data-a="${act}" data-i="${f.i}"><span>${f.fav?`<span class="star">${I.star}</span> `:""}${esc(f.n)}</span><small>${f.k} kcal ${f.u==="g"?"/ 100 g":"/ portion"}</small></button>`; }
 function qtySheet(){
-  const f=allFoods()[ADD.pick];
+  const f=ADD.food;
   sheet(`<h2>${esc(f.n)}</h2><div class="muted">${f.u==="g"?`${f.k} kcal pour 100 g`:`${f.k} kcal la portion`}</div>
     <div class="qty"><input id="qv" type="number" inputmode="decimal" value="${f.u==="g"?100:1}"><b>${f.u==="g"?"g":"portion(s)"}</b></div>
     <button class="btn full" id="qb" data-a="addpick">Ajouter · ${kcalOf(f,f.u==="g"?100:1)} kcal</button>
     ${f.fav?"":`<button class="btn soft full" style="margin-top:8px" data-a="favfood">${I.star} Garder dans mes aliments</button>`}
     <button class="btn ghost full" style="margin-top:8px" data-a="addback">Retour</button>`);
   document.getElementById("qv").addEventListener("input",e=>document.getElementById("qb").textContent=`Ajouter · ${kcalOf(f,parseFloat(e.target.value)||0)} kcal`);
+}
+// Produits de marque : base collaborative Open Food Facts (gratuite, en ligne)
+let OFF=[];
+async function offSearch(){
+  const q=ADD.q.trim(), box=document.getElementById("offres"); if(!box||q.length<3) return;
+  box.innerHTML=`<div class="muted" style="padding:10px 4px">Recherche en cours…</div>`;
+  try{
+    const r=await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=25&lc=fr&cc=fr&fields=product_name,product_name_fr,brands,nutriments`);
+    const j=await r.json();
+    OFF=(j.products||[]).map(p=>{ const nu=p.nutriments||{}, n=(p.product_name_fr||p.product_name||"").trim();
+      const k=nu["energy-kcal_100g"]??(nu.energy_100g?nu.energy_100g/4.184:null); if(!n||k==null) return null;
+      return {n:n+(p.brands?` (${p.brands.split(",")[0].trim()})`:""), k:Math.round(k), u:"g", m:[+nu.proteins_100g||0,+nu.carbohydrates_100g||0,+nu.fat_100g||0], c:guessCat(n), src:"off"}; }).filter(Boolean);
+    box.innerHTML=OFF.length?`<div class="sec">Produits de marque <span class="muted" style="font:500 12px var(--f-body)">· Open Food Facts</span></div>${OFF.map((f,i)=>foodRow({...f,i},"pickoff")).join("")}`:`<div class="muted" style="padding:10px 4px">Aucun produit trouvé.</div>`;
+  }catch(e){ box.innerHTML=`<div class="muted" style="padding:10px 4px">Recherche indisponible pour l'instant (pas de réseau ?).</div>`; }
+}
+// Photo du repas → Gemini (via la fonction Supabase) → aliments recalés sur la table Ciqual
+let PH=[];
+const STOP=new Set(["de","du","des","la","le","les","et","au","aux","en","a","sans","avec","sur","un","une","ou","type","precision","moyen","aliment"]);
+const toks=n=>norm(n).split(" ").filter(w=>w.length>1&&!STOP.has(w)).map(stem);
+function ciqualMatch(name){
+  const t=toks(name); if(!t.length||!CQ.length) return null; let best=null, bs=0;
+  const raw0=norm(name).split(" ")[0];
+  CQ.forEach(f=>{ const ft=toks(f.n); if(ft[0]!==t[0]) return; const nf=norm(f.n);
+    const s=t.filter(w=>ft.includes(w)).length/t.length-(ft.length-t.length)*0.03
+      +(nf.split(" ")[0]===raw0?0.15:0)+(/moyen|sans precision|standard/.test(nf)?0.05:0);   // même mot exact (pâtes ≠ pâte brisée)
+    if(s>bs){ bs=s; best=f; } });
+  return bs>=0.6?best:null;
+}
+async function photoImage(file){                    // réduit la photo (1024 px) pour l'envoi
+  const url=URL.createObjectURL(file), img=new Image(); img.src=url; await img.decode();
+  const sc=Math.min(1,1024/Math.max(img.width,img.height)), c=document.createElement("canvas");
+  c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc); c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url);
+  return c.toDataURL("image/jpeg",0.82).split(",")[1];
+}
+async function handlePhoto(file){
+  if(!sb){ toast("La photo marche dans l'appli installée, une fois connectée"); return; }
+  sheet(`<div style="text-align:center;padding:30px 0"><span class="bob" style="display:inline-block;width:90px">${D.bowl()}</span><h2 style="justify-content:center">Je regarde ton assiette…</h2><div class="muted">Quelques secondes</div></div>`);
+  try{
+    const image=await photoImage(file);
+    const {data,error}=await sb.functions.invoke("analyse-repas",{body:{image,mime:"image/jpeg"}});
+    if(error){ let code=""; try{ code=(await error.context.json()).error; }catch(e){}
+      throw new Error(code==="no_key"?"La clé Gemini n'est pas encore configurée.":code==="quota"?"Le quota gratuit du jour est atteint, réessaie plus tard.":"L'analyse n'a pas marché, réessaie."); }
+    PH=(data.aliments||[]).map(a=>{ const g=Math.max(1,Math.round(+a.grammes||0)), m=ciqualMatch(a.nom);
+      const per=m?{k:m.k,mm:m.m,c:m.c}:{k:Math.round((+a.kcal||0)/g*100), mm:[(+a.proteines||0)/g*100,(+a.glucides||0)/g*100,(+a.lipides||0)/g*100], c:a.famille||guessCat(a.nom)};
+      return {on:true, nom:m?m.n:a.nom, vu:a.nom, g, ...per, conf:a.confiance||"moyenne", cq:!!m}; });
+    if(!PH.length){ sheet(`<h2>Rien trouvé</h2><div class="muted">${esc(data.remarque||"Je n'ai pas reconnu d'aliment sur cette photo.")}</div><button class="btn soft full" style="margin-top:14px" data-a="addback">Retour</button>`); return; }
+    photoSheet(data.remarque);
+  }catch(e){ sheet(`<h2>Oups</h2><div class="muted">${esc(e.message||"L'analyse n'a pas marché.")}</div><button class="btn soft full" style="margin-top:14px" data-a="addback">Retour</button>`); }
+}
+function photoSheet(note){
+  const tot=()=>PH.filter(x=>x.on).reduce((a,x)=>a+Math.round(x.k*x.g/100),0);
+  sheet(`<h2>📷 Sur ta photo</h2><div class="muted" style="font-size:13px">Vérifie et corrige les quantités : c'est une estimation. Décoche ce qui n'y est pas.</div>
+    ${note?`<div class="tipline">${esc(note)}</div>`:""}
+    <div class="phl">${PH.map((x,i)=>`<div class="phr ${x.on?"":"off"}" data-i="${i}">
+      <button class="phc" data-i="${i}">${x.on?CK:""}</button>
+      <div class="phn"><b>${CATS[x.c]?.e||"🍽️"} ${esc(x.nom)}</b><small>${x.cq?`Table Ciqual · vu : ${esc(x.vu)}`:"Estimation de l'IA"}${x.conf==="basse"?" · pas sûr":""}</small></div>
+      <input class="phg" data-i="${i}" type="number" inputmode="numeric" value="${x.g}"><span class="phu">g</span><span class="phk" id="phk${i}">${Math.round(x.k*x.g/100)}</span></div>`).join("")}</div>
+    <div class="row between card" style="margin-top:10px"><b style="font:650 16px var(--f-title)">Total</b><b class="big" id="phtot" style="font-size:24px">${tot()} kcal</b></div>
+    <button class="btn full" style="margin-top:12px" data-a="phok">Ajouter à « ${esc(ADD.meal)} »</button>
+    <button class="btn ghost full" style="margin-top:8px" data-a="addback">Annuler</button>`);
+  document.querySelectorAll(".phg").forEach(el=>el.addEventListener("input",()=>{ const x=PH[+el.dataset.i]; x.g=Math.max(0,+el.value||0);
+    document.getElementById("phk"+el.dataset.i).textContent=Math.round(x.k*x.g/100); document.getElementById("phtot").textContent=tot()+" kcal"; }));
+  document.querySelectorAll(".phc").forEach(el=>el.addEventListener("click",()=>{ const x=PH[+el.dataset.i]; x.on=!x.on; el.innerHTML=x.on?CK:""; el.parentNode.classList.toggle("off",!x.on); document.getElementById("phtot").textContent=tot()+" kcal"; }));
+}
+function photoConfirm(){
+  const f=foodDay(FOODDAY), list=PH.filter(x=>x.on&&x.g>0); if(!list.length){ toast("Coche au moins un aliment"); return; }
+  list.forEach(x=>f.extras.push({id:uid(), meal:ADD.meal, n:`${x.nom} · ${x.g} g`, base:x.nom, k:Math.round(x.k*x.g/100), b:x.k, u:"g", q:x.g, c:x.c, bm:x.mm, from:"📷 Photo"}));
+  save("food:"+FOODDAY); closeSheet(); refreshFood(); toast(`${list.length} aliment${list.length>1?"s":""} ajouté${list.length>1?"s":""} 📷`);
 }
 function pushExtra(x){ if(!x.c) x.c=guessCat(x.n); const f=foodDay(FOODDAY); x.id=uid(); x.meal=ADD.meal; f.extras.push(x); JUST=x.id; save("food:"+FOODDAY); closeSheet(); refreshFood(); toast(`Ajouté · ${x.k} kcal`); }
 // Redessine seulement la zone du jour (l'en-tête et ses cerises ne bougent pas) ; glissé fondu quand on change de jour
@@ -972,6 +1131,7 @@ function editSheet(){
       <div class="form"><div class="field wide"><label>Nom</label><input id="en" value="${esc(ED.name)}" placeholder="ex. Granola maison"></div>
       <div class="field"><label>Calories</label><input id="ek" type="number" inputmode="numeric" value="${ED.data.kcal||""}" placeholder="kcal"></div>
       <div class="field"><label>Pour</label><select id="eu"><option value="g" ${ED.data.unit==="g"?"selected":""}>100 g</option><option value="u" ${ED.data.unit!=="g"?"selected":""}>1 portion</option></select></div>
+      <div class="field wide"><label>Protéines / glucides / lipides en g (facultatif, même base que les calories)</label><div class="freerow" style="grid-template-columns:1fr 1fr 1fr"><input id="em0" type="number" inputmode="decimal" placeholder="prot." value="${ED.data.m?.[0]??""}"><input id="em1" type="number" inputmode="decimal" placeholder="gluc." value="${ED.data.m?.[1]??""}"><input id="em2" type="number" inputmode="decimal" placeholder="lip." value="${ED.data.m?.[2]??""}"></div></div>
       <div class="field wide"><label>Famille</label><select id="ec">${Object.keys(CATS).map(c=>`<option value="${c}" ${(ED.data.cat||guessCat(ED.name||""))===c?"selected":""}>${CATS[c].e} ${CATS[c].l}</option>`).join("")}</select></div></div>
       <button class="btn full" style="margin-top:14px" data-a="savetpl">Enregistrer</button>
       ${S.templates.some(t=>t.id===ED.id)?`<button class="btn ghost full" style="margin-top:8px;color:var(--run)" data-a="deltpl">Supprimer</button>`:""}`);
@@ -982,7 +1142,7 @@ function editSheet(){
     <div class="field"><label>Nom du repas</label><input id="en" value="${esc(ED.name)}" placeholder="ex. Petit-déj gourmand"></div>
     <div class="erow h"><span>Aliment</span><span>Qté</span><span>Unité</span><span>kcal</span><span></span></div>
     ${ED.data.items.map((it,i)=>`<div class="erow"><input list="dl" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="Aliment"><input type="number" inputmode="decimal" data-i="${i}" data-f="q" value="${it.q??""}"><select data-i="${i}" data-f="u"><option value="g" ${it.u==="g"?"selected":""}>g</option><option value="u" ${it.u!=="g"?"selected":""}>port.</option></select><input type="number" inputmode="numeric" data-i="${i}" data-f="k" value="${it.k??""}"><button class="del" data-a="rowdel" data-i="${i}">${I.x}</button></div>`).join("")}
-    <datalist id="dl">${allFoods().map(f=>`<option value="${esc(f.n)}">`).join("")}</datalist>
+    <datalist id="dl">${allFoods().filter(f=>!f.src).map(f=>`<option value="${esc(f.n)}">`).join("")}</datalist>
     <button class="addbtn" data-a="rowadd">${I.plus} Ajouter un aliment</button>
     <div class="row between card" style="margin-top:8px"><b style="font:650 16px var(--f-title)">Total</b><b class="big" id="etot" style="font-size:24px">${tot} kcal</b></div>
     <div class="muted" style="font-size:12px;margin-top:6px">Tape un aliment de la liste et sa quantité : les calories se calculent toutes seules. Tu peux les corriger à la main.</div>
@@ -1140,6 +1300,7 @@ function settingsSheet(){
     <div class="field wide"><label>Poids de référence si aucune mesure (kg)</label><input id="sw" type="number" inputmode="decimal" value="${S.settings.weight||""}" placeholder="60"></div></div>
     <button class="btn full" style="margin-top:14px" data-a="saveset">Enregistrer</button>
     <button class="btn soft full" style="margin-top:8px" data-a="previewj">${PREVIEW_J?"Quitter l'aperçu du jour J":"🏅 Voir l'écran du jour J"}</button>
+    <p class="note">Valeurs nutritionnelles : table Ciqual 2025 de l'ANSES et Open Food Facts (base collaborative, licence ODbL). Photo analysée par Google Gemini.</p>
     ${sb?`<button class="btn ghost full" style="margin-top:8px" data-a="logout">Se déconnecter</button>`:`<p class="note">Mode aperçu : les données restent sur ce téléphone.</p>`}`);
 }
 
@@ -1165,7 +1326,7 @@ const A = {
   today:()=>{ const dir=FOODDAY<TODAY?"left":"right"; FOODDAY=TODAY; refreshFood(dir); },
   type:b=>{ foodDay(FOODDAY).type=b.dataset.t||null; save("food:"+FOODDAY); refreshFood(); },
   asplan:b=>{ const t=dayType(FOODDAY), meal=MENU[t][+b.dataset.m], f=foodDay(FOODDAY), ents=mealEnts(FOODDAY,meal), have=new Set(ents.map(x=>x.c));
-    meal.items.filter(i=>!ents.length||!have.has(i[2])).forEach(i=>f.extras.push({id:uid(), meal:meal.m, n:i[0], k:i[1], b:i[1], q:1, u:"p", c:i[2], plan:1}));
+    meal.items.filter(i=>!ents.length||!have.has(i[2])).forEach(i=>f.extras.push({id:uid(), meal:meal.m, n:i[0], k:i[1], b:i[1], q:1, u:"p", c:i[2], bm:i[4], plan:1}));
     save("food:"+FOODDAY); refreshFood(); },
   editx:b=>{ const x=foodDay(FOODDAY).extras.find(e=>e.id===b.dataset.id); if(!x) return; EX=JSON.parse(JSON.stringify(x)); if(!EX.u){ EX.u="p"; EX.b=EX.k; EX.q=1; } editxSheet(); },
   exq:b=>{ EX.q=+b.dataset.v; if(!EX.kmanual) EX.k=Math.round(EX.b*EX.q); editxSheet(); },
@@ -1173,12 +1334,23 @@ const A = {
   exsave:()=>{ EX.k=+document.getElementById("xk").value||0; const f=foodDay(FOODDAY), i=f.extras.findIndex(e=>e.id===EX.id); if(i>=0){ delete EX.kmanual; f.extras[i]=EX; } save("food:"+FOODDAY); closeSheet(); refreshFood(); },
   delx:b=>{ if(b.closest(".sheet")) closeSheet();  const f=foodDay(FOODDAY); f.extras=f.extras.filter(x=>x.id!==b.dataset.id); save("food:"+FOODDAY); refreshFood(); },
   add:b=>{ ADD={meal:MENU[dayType(FOODDAY)][+b.dataset.m].m,q:"",pick:null}; addSheet(); },
-  pick:b=>{ ADD.pick=+b.dataset.i; qtySheet(); },
+  pick:b=>{ ADD.food=allFoods()[+b.dataset.i]; qtySheet(); },
+  pickoff:b=>{ ADD.food=OFF[+b.dataset.i]; qtySheet(); },
+  off:()=>offSearch(),
+  phok:()=>photoConfirm(),
   addback:()=>addSheet(),
-  addpick:()=>{ const f=allFoods()[ADD.pick], q=parseFloat(document.getElementById("qv").value)||0; pushExtra({n:`${f.n} · ${q}${f.u==="g"?" g":" portion"+(q>1?"s":"")}`, base:f.n, k:kcalOf(f,q), b:f.k, u:f.u, q, c:f.c}); },
-  favfood:async b=>{ const f=allFoods()[ADD.pick]; await saveTpl({id:crypto.randomUUID(),kind:"food",name:f.n,data:{kcal:f.k,unit:f.u,cat:f.c}}); b.remove(); toast("Gardé dans tes aliments ⭐"); },
+  addpick:()=>{ const f=ADD.food, q=parseFloat(document.getElementById("qv").value)||0; pushExtra({n:`${f.n} · ${q}${f.u==="g"?" g":" portion"+(q>1?"s":"")}`, base:f.n, k:kcalOf(f,q), b:f.k, u:f.u, q, c:f.c, bm:f.m||undefined}); },
+  addsg:b=>{ const t=dayType(FOODDAY), meal=MENU[t][+b.dataset.m], f=allFoods()[+b.dataset.i], q=+b.dataset.q, fd=foodDay(FOODDAY);
+    const x={id:uid(), meal:meal.m, n:`${f.n} · ${q}${f.u==="g"?" g":" portion"+(q>1?"s":"")}`, base:f.n, k:kcalOf(f,q), b:f.k, u:f.u, q, c:f.c, bm:f.m||undefined};
+    const same=fd.extras.find(e=>e.meal===meal.m && e.base===f.n && e.u===f.u);      // même aliment déjà noté : on augmente la quantité
+    if(same){ same.q=+(same.q+q).toFixed(2); same.k=kcalOf(f,same.q); same.n=`${f.n} · ${same.q}${f.u==="g"?" g":" portion"+(same.q>1?"s":"")}`; JUST=same.id; }
+    else { fd.extras.push(x); JUST=x.id; }
+    save("food:"+FOODDAY); refreshFood(); toast(`Ajouté · ${x.k} kcal`); },
+  favfood:async b=>{ const f=ADD.food; await saveTpl({id:crypto.randomUUID(),kind:"food",name:f.n,data:{kcal:f.k,unit:f.u,cat:f.c,m:f.m||null}}); b.remove(); toast("Gardé dans tes aliments ⭐"); },
   usetpl:b=>{ const m=S.templates.find(t=>t.id===b.dataset.id), f=foodDay(FOODDAY);
-    m.data.items.forEach(i=>{ const fd=findFood(i.n); f.extras.push({id:uid(), meal:ADD.meal, n:i.n+(i.q?` · ${i.q}${i.u==="g"?" g":""}`:""), k:+i.k||0, b:+i.k||0, q:1, u:"p", c:i.c||fd?.c||guessCat(i.n), from:m.name}); });
+    m.data.items.forEach(i=>{ const fd=findFood(i.n), c=i.c||fd?.c||guessCat(i.n);
+      const x=(fd&&fd.m&&+i.q)?{u:i.u==="g"?"g":"u", q:+i.q, b:fd.k, bm:fd.m}:{u:"p", q:1, b:+i.k||0};
+      f.extras.push({id:uid(), meal:ADD.meal, n:i.n+(i.q?` · ${i.q}${i.u==="g"?" g":""}`:""), base:i.n, k:+i.k||0, c, from:m.name, ...x}); });
     JUST=null; save("food:"+FOODDAY); closeSheet(); refreshFood(); toast(`${m.name} ajouté · ${tplK(m)} kcal`); },
   free:()=>{ const n=document.getElementById("fn").value.trim(), k=parseInt(document.getElementById("fk").value); if(!n||!k){ toast("Indique l'aliment et ses calories"); return; } pushExtra({n,k,b:k,q:1,u:"p",c:guessCat(n)}); },
   favs:()=>favSheet(),
@@ -1192,7 +1364,7 @@ const A = {
     ED={id:crypto.randomUUID(),kind:"meal",name:"",data:{items}}; editSheet(); },
   savetpl:async ()=>{
     ED.name=document.getElementById("en").value.trim(); if(!ED.name){ toast("Donne-lui un nom"); return; }
-    if(ED.kind==="food"){ ED.data={kcal:+document.getElementById("ek").value||0, unit:document.getElementById("eu").value, cat:document.getElementById("ec").value}; if(!ED.data.kcal){ toast("Indique les calories"); return; } }
+    if(ED.kind==="food"){ const mm=[0,1,2].map(j=>document.getElementById("em"+j).value); ED.data={kcal:+document.getElementById("ek").value||0, unit:document.getElementById("eu").value, cat:document.getElementById("ec").value, m:mm.every(v=>v!=="")?mm.map(Number):null}; if(!ED.data.kcal){ toast("Indique les calories"); return; } }
     else { ED.data.items=ED.data.items.filter(i=>i.n.trim()).map(i=>({...i, c:i.c||findFood(i.n)?.c||guessCat(i.n)})); if(!ED.data.items.length){ toast("Ajoute au moins un aliment"); return; } }
     await saveTpl(ED); toast("Enregistré ⭐"); favSheet(); refreshFood(); },
   deltpl:async ()=>{ await saveTpl(ED,true); toast("Supprimé"); favSheet(); refreshFood(); },
@@ -1281,7 +1453,7 @@ function toast(t){ document.querySelectorAll(".toast").forEach(x=>x.remove()); c
    10. DÉMARRAGE : connexion Supabase ou mode aperçu
    ===================================================================== */
 function startApp(){
-  setPlan();
+  setPlan(); if(!CQ.length) loadCiqual();
   document.getElementById("tabs").innerHTML=TABS.map(([k,l,ic])=>`<button data-a="go" data-t="${k}">${ic}${l}</button>`).join("");
   document.getElementById("nav").classList.remove("hide");
   render("page");
