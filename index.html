@@ -1130,7 +1130,8 @@ function pushExtra(x){ if(!x.c) x.c=guessCat(x.n); const f=foodDay(FOODDAY); x.i
 let foodAnim=null;
 function refreshFood(dir){
   const fb=document.getElementById("foodbody"); if(TAB!=="food"||!fb){ render(); return; }
-  const fc=document.querySelector(".favcard"); if(fc) fc.outerHTML=favCard();
+  const fc=document.querySelector(".favcard .ft span");                       // on ne met à jour que le texte : le cœur continue son mouvement
+  if(fc){ const tmp=document.createElement("div"); tmp.innerHTML=favCard(); const nt=tmp.querySelector(".ft span").textContent; if(fc.textContent!==nt) fc.textContent=nt; }
   if(!dir){ fb.innerHTML=foodBody(); JUST=null; animate(fb); checkBadges(); return; }
   foodAnim?.cancel(); const off=dir==="left"?-22:22;
   foodAnim=fb.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateX(${off}px)`}],{duration:150,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"});
