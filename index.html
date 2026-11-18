@@ -156,7 +156,7 @@ button.mini::before{content:"";position:absolute;inset:-12px}
 
 /* ---------- Alimentation ---------- */
 .daynav{display:flex;align-items:center;justify-content:space-between;margin:10px 0 12px}
-.daynav button{width:42px;height:42px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+.daynav>button{width:42px;height:42px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
 .daynav .lbl{text-align:center}
 .daynav .lbl b{font:650 18px var(--f-title);display:block}
 .typesw{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -198,12 +198,34 @@ button.mini::before{content:"";position:absolute;inset:-12px}
 .del{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
 .foot{margin-top:16px;background:#F3ECE4;border-radius:var(--r);padding:14px 16px;font-size:13.5px;display:grid;gap:6px;position:relative;overflow:hidden}
 .foot .ill{position:absolute;right:-6px;bottom:-8px;width:64px;opacity:.6}
+.daynav .todaybtn{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:5px 12px;border-radius:99px;background:var(--lav-soft);color:var(--lav);font-size:12.5px;font-weight:650}
+.favcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:14px;padding:12px 14px;border-radius:20px;background:linear-gradient(135deg,var(--lav-soft),#F6EEFA);border:1px solid #E2DBF3}
+.favcard .fi{width:40px;height:40px;border-radius:14px;background:#fff;display:grid;place-items:center;flex:none;padding:9px}
+.favcard .ft{flex:1;min-width:0}
+.favcard .ft b{display:block;font:650 16px var(--f-title);color:var(--ink)}
+.favcard .ft span{display:block;font-size:12.5px;color:var(--muted);line-height:1.35}
+.favcard .chev{width:32px;height:32px;border-radius:11px;background:var(--lav);color:#fff;display:grid;place-items:center;flex:none}
+.jjhero{margin-top:16px;border-radius:24px;padding:20px;text-align:center;background:linear-gradient(135deg,var(--lav-soft),var(--rose-soft) 60%,var(--butter-soft));position:relative}
+.jjhero .m{display:block;width:70px;margin:0 auto 6px}
+.jjhero b{display:block;font:700 22px var(--f-title)}
+.jjhero span{display:block;font-size:14px;color:var(--muted);margin-top:6px}
+.kmbar{display:flex;gap:3px;position:relative;margin:22px 0 10px}
+.kmbar i{flex:1;height:14px;border-radius:5px;animation:rise .4s var(--ease) both}
+.kmbar .gel{position:absolute;top:-22px;transform:translateX(-50%);font-size:15px}
+.kmleg{display:grid;gap:8px;font-size:13.5px}
+.kmleg div{display:flex;align-items:center;gap:8px}
+.kmleg i{width:12px;height:12px;border-radius:4px;flex:none}
+.kmleg span{color:var(--muted)}
+.jjlist{padding:4px 0}
 .favbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:99px;background:var(--lav-soft);color:var(--lav);font-weight:650;font-size:13px}
 
 /* ---------- Suivi ---------- */
 .form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .field label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.field{min-width:0}
 .field input,.field select{width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:#fff;font-size:16px}
+.field input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;height:48px;line-height:22px;text-align:left}
+.field input[type=date]::-webkit-date-and-time-value{text-align:left}
 .field.wide{grid-column:1/-1}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .chips button{padding:7px 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:600;transition:background .25s,color .25s}
@@ -549,7 +571,12 @@ const MEALIC = {
 const head = (big, s1="#F3D88A", s2="#C9DDF0")=>`
   <span class="deco1 bob">${big}</span>
   <span class="deco2 twinkle">${D.sparkle(s1)}</span>
-  <span class="deco3 twinkle" style="animation-delay:1.1s">${D.sparkle(s2)}</span>`;
+  <span class="deco3 twinkle" data-off="1.1">${D.sparkle(s2)}</span>`;
+// Chaque élément animé démarre « au bon moment » de l'horloge commune : redessiner la page ne relance pas son mouvement
+function syncPhase(root){
+  const t=performance.now()/1000;
+  root.querySelectorAll(".bob,.twinkle,.spin").forEach(el=>{ if(el.dataset.ph) return; el.dataset.ph=1; el.style.animationDelay=(-t+(+el.dataset.off||0)).toFixed(3)+"s"; });
+}
 
 /* =====================================================================
    7. RENDU + ANIMATIONS
@@ -566,6 +593,7 @@ function render(anim){
   document.querySelectorAll("#tabs button").forEach((b,i)=>b.classList.toggle("on",TABS[i][0]===TAB));
   document.getElementById("ind").style.transform=`translateX(${TABS.findIndex(t=>t[0]===TAB)*100}%)`;
   JUST=null; animate(); checkBadges();
+  if(anim==="page" && TAB==="home" && TODAY===RACE) setTimeout(()=>{ const h=document.querySelector(".jjhero"); if(h) confetti(h); },400);
 }
 function setRing(el,to){            // l'anneau part de sa valeur actuelle et glisse vers la nouvelle
   const C=+el.dataset.c; el.style.transition="stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1), opacity .3s";
@@ -579,6 +607,7 @@ function countTo(el,k,to){
   requestAnimationFrame(step);
 }
 function animate(root=document){
+  syncPhase(root);
   // anneaux de calories
   root.querySelectorAll("[data-ring]").forEach(el=>requestAnimationFrame(()=>requestAnimationFrame(()=>setRing(el,+el.dataset.to))));
   // barres de progression
@@ -644,7 +673,33 @@ function sessCard(s, full){
 }
 
 /* --- Page Aujourd'hui --- */
+let PREVIEW_J=false;
+const SAC=["Dossard + 4 épingles","Puce de chronométrage","2 gels (+1 de secours)","Montre chargée","Tenue et chaussures déjà testées","Petit-déj 2h30 avant le départ","Un peu d'eau avant le départ","Un vieux pull à jeter pour attendre au départ"];
+const VEILLE=["Dossard récupéré","Tenue prête, épingles mises","Gels dans la poche","Dîner riche en glucides","Réveil réglé","Au lit tôt"];
+function checklist(list,pre){ const jj=S.settings.jj||{};
+  return `<div class="card jjlist">${list.map((x,i)=>{ const k=pre+i, on=!!jj[k]; return `<button class="item ${on?"on":""}" style="--tc:var(--lav);--hl:var(--lav-soft)" data-a="jj" data-k="${k}"><span class="box">${on?CK:""}</span><span class="nm">${x}</span></button>`; }).join("")}</div>`; }
+function raceHome(){
+  const s=PLAN[RACE], prev=PLAN_DATES.filter(d=>d!==RACE&&S.done[d]), km=Math.round(prev.reduce((a,d)=>a+PLAN[d].km,0)), fin=S.done[RACE];
+  const seg=[...Array(21)].map((_,i)=>{ const k=i+1, c=k<=3?"var(--butter)":k<=15?"var(--run)":"var(--rose)"; return `<i style="background:${c};animation-delay:${i*0.04}s"></i>`; }).join("");
+  return `<div class="head">${head(D.flower("#D9CFF3","#F3D88A"),"#F3D88A","#F6C9D3")}
+      <div class="eyebrow">${fmtDay(TODAY)}${PREVIEW_J?" · aperçu":""}</div>
+      <h1>${fin?"Finisheuse !":"C'est le jour J !"}</h1>
+      <div class="count"><span class="muted">Semi-marathon de Paris · 21,1 km</span><button class="gear" data-a="settings" aria-label="Réglages">${I.gear}</button></div>
+    </div>
+    <div class="jjhero"><span class="m bob">${D.medal()}</span>
+      <b>${fin?"Tu l'as fait ! 🏅":"Profite de chaque kilomètre 💜"}</b>
+      <span>${fin?`21,1 km dans les rues de Paris, après ${prev.length} séances et ${km} km de prépa. Bravo Léane !`:`${prev.length} séances et ${km} km pour en arriver là. Le plus dur est fait : aujourd'hui, c'est la fête.`}</span></div>
+    <h2>${deco(D.sparkle("#F3D88A"),"twinkle","width:20px")} Mon plan de course</h2>
+    <div class="card"><div class="kmbar">${seg}<span class="gel" style="left:${7.5/21*100}%">💧</span><span class="gel" style="left:${14.5/21*100}%">💧</span></div>
+      <div class="kmleg"><div><i style="background:var(--butter)"></i><b>km 1 → 3</b><span>6:20–6:25, je pars tranquille</span></div>
+      <div><i style="background:var(--run)"></i><b>km 4 → 15</b><span>6:10, mon allure semi</span></div>
+      <div><i style="background:var(--rose)"></i><b>km 16 → 21</b><span>6:05 si ça va, tout ce qu'il reste</span></div>
+      <div><span style="width:12px;text-align:center">💧</span><b>Gels</b><span>vers les km 7–8 et 14–15</span></div></div></div>
+    <h2>${deco(D.heart(),"bob","width:20px")} Mon sac</h2>${checklist(SAC,"sac")}
+    <h2>${deco(D.shoe(),"bob","width:28px")} Ma course</h2>${sessCard(s,true)}`;
+}
 function vHome(){
+  if(PREVIEW_J || TODAY===RACE) return raceHome();
   const s=PLAN[TODAY], next=PLAN_DATES.find(d=>d>TODAY);
   const t=dayType(TODAY), e=eaten(TODAY), tg=target(t);
   const mon=add(pd(TODAY),-((pd(TODAY).getDay()+6)%7)), days=[...Array(7)].map((_,i)=>ymd(add(mon,i)));
@@ -666,6 +721,7 @@ function vHome(){
         <div><span class="pill" style="background:${t==="run"?"var(--run-soft)":"var(--rest-soft)"};color:${t==="run"?"var(--run)":"var(--rest)"}">${t==="run"?"Jour de course":"Jour sans course"}</span>
         <div style="margin-top:8px;font-weight:600">${status(e,tg)}</div><div class="muted" style="font-size:13px;margin-top:4px">Touche pour noter tes repas →</div></div></div>
     </button>
+    ${TODAY===ymd(add(pd(RACE),-1))?`<h2>${deco(D.medal(),"bob","width:22px")} Demain, c'est le grand jour</h2><div class="muted" style="font-size:13.5px;margin:-4px 0 8px">Repos complet (ou 15 min de marche). Ce soir :</div>${checklist(VEILLE,"veille")}`:""}
     <h2>${deco(D.shoe(),"bob","width:28px")} Ma séance du jour</h2>
     ${s ? sessCard(s,true)
         : `<div class="restcard"><span class="ill bob">${D.cloud()}</span><span class="pill" style="background:#fff;color:var(--rest)">Repos</span>
@@ -724,8 +780,19 @@ function vFood(){
   const d=FOODDAY, f=S.food[d]||{type:null,checked:{},extras:[]}, t=dayType(d), e=eaten(d), tg=target(t);
   const tc=t==="run"?"var(--run)":"var(--rest)", hl=t==="run"?"var(--run-soft)":"var(--rest-soft)";
   return `<div class="head">${head(D.cherry(),"#F6C9D3","#B9D4AE")}<div class="eyebrow">Mon assiette au quotidien</div><h1>Ce que je mange</h1>
-      <button class="favbtn" style="margin-top:12px" data-a="favs">${I.star} Mes repas &amp; aliments</button></div>
-    <div class="daynav"><button data-a="day" data-n="-1">${I.l}</button><div class="lbl"><b>${d===TODAY?"Aujourd'hui":fmtDay(d,{weekday:"long",day:"numeric",month:"short"})}</b>${d===TODAY?`<span class="muted" style="font-size:12.5px">${fmtDay(d)}</span>`:`<button class="muted" style="font-size:12.5px;text-decoration:underline" data-a="today">Revenir à aujourd'hui</button>`}</div><button data-a="day" data-n="1">${I.r}</button></div>
+</div>
+    ${favCard()}
+    <div id="foodbody">${foodBody()}</div>`;
+}
+function favCard(){
+  const nm=S.templates.filter(t=>t.kind==="meal").length, nf=S.templates.filter(t=>t.kind==="food").length;
+  return `<button class="favcard" data-a="favs"><span class="fi bob">${D.heart("#B7A9E6")}</span>
+    <span class="ft"><b>Mes repas &amp; aliments</b><span>${nm||nf?`${nm} repas type${nm>1?"s":""} · ${nf} aliment${nf>1?"s":""} · touche pour en créer`:"Crée tes repas types et tes aliments favoris pour les ajouter en un geste"}</span></span>
+    <span class="chev">${I.plus}</span></button>`;
+}
+function foodBody(){
+  const d=FOODDAY, f=S.food[d]||{type:null,checked:{},extras:[]}, t=dayType(d), e=eaten(d), tg=target(t);
+  const tc=t==="run"?"var(--run)":"var(--rest)", hl=t==="run"?"var(--run-soft)":"var(--rest-soft)";  return `    <div class="daynav"><button data-a="day" data-n="-1">${I.l}</button><div class="lbl"><b>${d===TODAY?"Aujourd'hui":fmtDay(d,{weekday:"long",day:"numeric",month:"long"})}</b>${d===TODAY?`<span class="muted" style="font-size:12.5px">${fmtDay(d)}</span>`:`<button class="todaybtn" data-a="today"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg> Aujourd'hui</button>`}</div><button data-a="day" data-n="1">${I.r}</button></div>
     <div class="typesw">
       <button class="run ${t==="run"?"on":""}" data-a="type" data-t="run"><b>Jour de course</b><span>Plus de féculents</span></button>
       <button class="rest ${t==="rest"?"on":""}" data-a="type" data-t="rest"><b>Jour sans course</b><span>Moins de féculents</span></button>
@@ -777,7 +844,18 @@ function qtySheet(){
     <button class="btn ghost full" style="margin-top:8px" data-a="addback">Retour</button>`);
   document.getElementById("qv").addEventListener("input",e=>document.getElementById("qb").textContent=`Ajouter · ${kcalOf(f,parseFloat(e.target.value)||0)} kcal`);
 }
-function pushExtra(x){ const f=foodDay(FOODDAY); x.id=uid(); x.meal=ADD.meal; f.extras.push(x); JUST=x.id; save("food:"+FOODDAY); closeSheet(); render(); toast(`Ajouté · ${x.k} kcal`); }
+function pushExtra(x){ const f=foodDay(FOODDAY); x.id=uid(); x.meal=ADD.meal; f.extras.push(x); JUST=x.id; save("food:"+FOODDAY); closeSheet(); refreshFood(); toast(`Ajouté · ${x.k} kcal`); }
+// Redessine seulement la zone du jour (l'en-tête et ses cerises ne bougent pas) ; glissé fondu quand on change de jour
+let foodAnim=null;
+function refreshFood(dir){
+  const fb=document.getElementById("foodbody"); if(TAB!=="food"||!fb){ render(); return; }
+  const fc=document.querySelector(".favcard"); if(fc) fc.outerHTML=favCard();
+  if(!dir){ fb.innerHTML=foodBody(); JUST=null; animate(fb); checkBadges(); return; }
+  foodAnim?.cancel(); const off=dir==="left"?-22:22;
+  foodAnim=fb.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateX(${off}px)`}],{duration:150,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"});
+  foodAnim.onfinish=()=>{ fb.innerHTML=foodBody(); animate(fb);
+    foodAnim=fb.animate([{opacity:0,transform:`translateX(${-off}px)`},{opacity:1,transform:"none"}],{duration:320,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}); checkBadges(); };
+}
 
 /* --- Gestion des repas types et aliments --- */
 function favSheet(){
@@ -965,6 +1043,7 @@ function settingsSheet(){
     <div class="form">
     <div class="field wide"><label>Poids de référence si aucune mesure (kg)</label><input id="sw" type="number" inputmode="decimal" value="${S.settings.weight||""}" placeholder="60"></div></div>
     <button class="btn full" style="margin-top:14px" data-a="saveset">Enregistrer</button>
+    <button class="btn soft full" style="margin-top:8px" data-a="previewj">${PREVIEW_J?"Quitter l'aperçu du jour J":"🏅 Voir l'écran du jour J"}</button>
     ${sb?`<button class="btn ghost full" style="margin-top:8px" data-a="logout">Se déconnecter</button>`:`<p class="note">Mode aperçu : les données restent sur ce téléphone.</p>`}`);
 }
 
@@ -986,14 +1065,14 @@ const A = {
       if(inSheet) sheet(sessCard(PLAN[d],true),true);
       JUST=null; checkBadges();
     } else { if(inSheet) sheet(sessCard(PLAN[d],true),true); render(); } },
-  day:b=>{ const n=+b.dataset.n; FOODDAY=ymd(add(pd(FOODDAY),n)); render(n>0?"left":"right"); },
-  today:()=>{ const dir=FOODDAY<TODAY?"left":"right"; FOODDAY=TODAY; render(dir); },
-  type:b=>{ foodDay(FOODDAY).type=b.dataset.t||null; save("food:"+FOODDAY); render(); },
+  day:b=>{ const n=+b.dataset.n; FOODDAY=ymd(add(pd(FOODDAY),n)); refreshFood(n>0?"left":"right"); },
+  today:()=>{ const dir=FOODDAY<TODAY?"left":"right"; FOODDAY=TODAY; refreshFood(dir); },
+  type:b=>{ foodDay(FOODDAY).type=b.dataset.t||null; save("food:"+FOODDAY); refreshFood(); },
   tick:b=>{ const f=foodDay(FOODDAY), k=b.dataset.k, on=!f.checked[k];
     if(on) f.checked[k]=true; else delete f.checked[k]; save("food:"+FOODDAY);
     b.classList.toggle("on",on); b.classList.remove("fresh"); void b.offsetWidth; if(on) b.classList.add("fresh");
     b.querySelector(".box").innerHTML=on?CK:""; foodLive(); },
-  delx:b=>{ const f=foodDay(FOODDAY); f.extras=f.extras.filter(x=>x.id!==b.dataset.id); save("food:"+FOODDAY); render(); },
+  delx:b=>{ const f=foodDay(FOODDAY); f.extras=f.extras.filter(x=>x.id!==b.dataset.id); save("food:"+FOODDAY); refreshFood(); },
   add:b=>{ ADD={meal:MENU[dayType(FOODDAY)][+b.dataset.m].m,q:"",pick:null}; addSheet(); },
   pick:b=>{ ADD.pick=+b.dataset.i; qtySheet(); },
   addback:()=>addSheet(),
@@ -1015,8 +1094,8 @@ const A = {
     ED.name=document.getElementById("en").value.trim(); if(!ED.name){ toast("Donne-lui un nom"); return; }
     if(ED.kind==="food"){ ED.data={kcal:+document.getElementById("ek").value||0, unit:document.getElementById("eu").value}; if(!ED.data.kcal){ toast("Indique les calories"); return; } }
     else { ED.data.items=ED.data.items.filter(i=>i.n.trim()); if(!ED.data.items.length){ toast("Ajoute au moins un aliment"); return; } }
-    await saveTpl(ED); toast("Enregistré ⭐"); favSheet(); render(); },
-  deltpl:async ()=>{ await saveTpl(ED,true); toast("Supprimé"); favSheet(); render(); },
+    await saveTpl(ED); toast("Enregistré ⭐"); favSheet(); refreshFood(); },
+  deltpl:async ()=>{ await saveTpl(ED,true); toast("Supprimé"); favSheet(); refreshFood(); },
   mf:b=>{ MFIELD=b.dataset.f; document.querySelectorAll('[data-a="mf"]').forEach(x=>x.classList.toggle("on",x.dataset.f===MFIELD));
     const box=document.getElementById("chartbox"); box.innerHTML=chartInner(); box.animate([{opacity:0},{opacity:1}],{duration:350,easing:"ease-out"}); animate(box); },
   addm:()=>{ const day=document.getElementById("m-day").value||TODAY, m={day}; let any=false;
@@ -1026,6 +1105,9 @@ const A = {
     save("measure:"+day); render(); toast("Mesure enregistrée 🌷"); confetti(document.querySelector('[data-a="addm"]')||document.body); },
   delm:b=>{ S.measures=S.measures.filter(x=>x.day!==b.dataset.d); save("measure:"+b.dataset.d); render(); },
   settings:()=>settingsSheet(),
+  jj:b=>{ const k=b.dataset.k; S.settings.jj=S.settings.jj||{}; const on=!S.settings.jj[k]; if(on) S.settings.jj[k]=true; else delete S.settings.jj[k]; save("state");
+    b.classList.toggle("on",on); b.classList.remove("fresh"); void b.offsetWidth; if(on) b.classList.add("fresh"); b.querySelector(".box").innerHTML=on?CK:""; },
+  previewj:()=>{ PREVIEW_J=!PREVIEW_J; closeSheet(); TAB="home"; render("page"); scrollTo({top:0}); if(PREVIEW_J) setTimeout(()=>{ const h=document.querySelector(".jjhero"); if(h) for(let i=0;i<3;i++) setTimeout(()=>confetti(h),i*250); },400); },
   badges:()=>badgesSheet(),
   saveset:()=>{
     const w=parseFloat(document.getElementById("sw").value); if(isFinite(w)) S.settings.weight=w; else delete S.settings.weight;
@@ -1054,10 +1136,10 @@ document.addEventListener("click",e=>{ const b=e.target.closest("[data-a]"); if(
    ===================================================================== */
 function sheet(html, keep, cls){
   const host=document.getElementById("sheet"); let open=host.querySelector(".sheet");
-  if(open){ open.className="sheet "+(cls||""); open.innerHTML=`<div class="grab"></div>${html}`; if(!keep){ open.scrollTop=0; open.firstElementChild.nextElementSibling?.classList.add("slideL"); } fitSheet(); return; }
+  if(open){ open.className="sheet "+(cls||""); open.innerHTML=`<div class="grab"></div>${html}`; syncPhase(open); if(!keep){ open.scrollTop=0; open.firstElementChild.nextElementSibling?.classList.add("slideL"); } fitSheet(); return; }
   host.innerHTML=`<div class="sheet-bg"><div class="sheet ${cls||""}"><div class="grab"></div>${html}</div></div>`;
   host.querySelector(".sheet-bg").addEventListener("click",e=>{ if(e.target.classList.contains("sheet-bg")) closeSheet(); });
-  dragClose(host.querySelector(".sheet")); fitSheet();
+  dragClose(host.querySelector(".sheet")); fitSheet(); syncPhase(host);
 }
 // Glisser la feuille vers le bas pour la fermer (quand son contenu est tout en haut)
 function dragClose(sh){
@@ -1078,8 +1160,15 @@ function dragClose(sh){
   });
 }
 // La grande feuille « Ajouter » s'adapte au clavier de l'iPhone : la saisie libre reste visible
-function fitSheet(){ const sh=document.querySelector(".sheet.tall"); if(!sh) return; const h=(window.visualViewport?.height||innerHeight); sh.style.height=Math.round(h*0.9)+"px"; }
+// Le fond des feuilles suit la zone visible de l'écran : avec le clavier ouvert, la feuille se pose juste au-dessus
+function fitSheet(){
+  const bg=document.querySelector(".sheet-bg"), vv=window.visualViewport; if(!bg||!vv) return;
+  bg.style.top=vv.offsetTop+"px"; bg.style.bottom="auto"; bg.style.height=vv.height+"px";
+  const sh=bg.querySelector(".sheet.tall"); if(sh) sh.style.height=Math.round(Math.min(vv.height-10, innerHeight*0.88))+"px";
+  const sl=bg.querySelector(".sheet:not(.tall)"); if(sl) sl.style.maxHeight=Math.round(vv.height*0.92)+"px";
+}
 window.visualViewport?.addEventListener("resize",fitSheet);
+window.visualViewport?.addEventListener("scroll",fitSheet);
 function closeSheet(){ const bg=document.querySelector(".sheet-bg"); if(!bg) return; const sh=bg.firstChild;
   sh.style.transition="transform .25s cubic-bezier(.4,0,1,1)"; sh.style.transform="translateY(105%)";
   bg.style.transition="background .25s"; bg.style.background="rgba(46,36,32,0)";
