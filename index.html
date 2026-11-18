@@ -1069,15 +1069,19 @@ async function handlePhoto(file){
   sheet(`<div style="text-align:center;padding:30px 0"><span class="bob" style="display:inline-block;width:90px">${D.bowl()}</span><h2 style="justify-content:center">Je regarde ton assiette…</h2><div class="muted">Quelques secondes</div></div>`);
   try{
     const image=await photoImage(file);
-    const {data,error}=await sb.functions.invoke("analyse-repas",{body:{image,mime:"image/jpeg"}});
-    if(error){ let code=""; try{ code=(await error.context.json()).error; }catch(e){}
-      throw new Error(code==="no_key"?"La clé Gemini n'est pas encore configurée.":code==="quota"?"Le quota gratuit du jour est atteint, réessaie plus tard.":"L'analyse n'a pas marché, réessaie."); }
+    const call=sb.functions.invoke("analyse-repas",{body:{image,mime:"image/jpeg"}});
+    const late=new Promise(r=>setTimeout(()=>r({error:{timeout:1}}),70000));                 // au-delà d'1 min 10, on abandonne
+    const {data,error}=await Promise.race([call,late]);
+    if(error){ if(error.timeout) throw new Error("L'analyse prend trop de temps. Réessaie dans un instant.");
+      let b={}; try{ b=await error.context.json(); }catch(e){}
+      const msg={no_key:"La clé Gemini n'est pas encore configurée.", bad_key:"La clé Gemini est refusée par Google : vérifie-la dans Supabase.", quota:"Le quota gratuit du jour est atteint, réessaie plus tard."}[b.error]||"L'analyse n'a pas marché, réessaie.";
+      throw new Error(msg+(b.detail?.length?`\n\nDétail : ${String(b.detail[0]).slice(0,160)}`:"")); }
     PH=(data.aliments||[]).map(a=>{ const g=Math.max(1,Math.round(+a.grammes||0)), m=ciqualMatch(a.nom);
       const per=m?{k:m.k,mm:m.m,c:m.c}:{k:Math.round((+a.kcal||0)/g*100), mm:[(+a.proteines||0)/g*100,(+a.glucides||0)/g*100,(+a.lipides||0)/g*100], c:a.famille||guessCat(a.nom)};
       return {on:true, nom:m?m.n:a.nom, vu:a.nom, g, ...per, conf:a.confiance||"moyenne", cq:!!m}; });
     if(!PH.length){ sheet(`<h2>Rien trouvé</h2><div class="muted">${esc(data.remarque||"Je n'ai pas reconnu d'aliment sur cette photo.")}</div><button class="btn soft full" style="margin-top:14px" data-a="addback">Retour</button>`); return; }
     photoSheet(data.remarque);
-  }catch(e){ sheet(`<h2>Oups</h2><div class="muted">${esc(e.message||"L'analyse n'a pas marché.")}</div><button class="btn soft full" style="margin-top:14px" data-a="addback">Retour</button>`); }
+  }catch(e){ sheet(`<h2>Oups</h2><div class="muted" style="white-space:pre-line">${esc(e.message||"L'analyse n'a pas marché.")}</div><button class="btn soft full" style="margin-top:14px" data-a="addback">Retour</button>`); }
 }
 function photoSheet(note){
   const tot=()=>PH.filter(x=>x.on).reduce((a,x)=>a+Math.round(x.k*x.g/100),0);
