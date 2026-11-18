@@ -763,7 +763,9 @@ function render(anim){
   const v=document.getElementById("view");
   v.innerHTML = ({home:vHome,run:vRun,food:vFood,track:vTrack})[TAB]();
   v.className = anim==="page"?"enter":anim==="left"?"slideL":anim==="right"?"slideR":"";
-  if(anim){ v.style.animation="none"; v.offsetHeight; v.style.animation=""; }
+  if(anim){ v.style.animation="none"; v.offsetHeight; v.style.animation="";
+    const tok=v.dataset.tok=String(Date.now());                                      // une fois l'entrée finie, on retire la classe :
+    setTimeout(()=>{ if(v.dataset.tok===tok) v.className=""; },900); }              // plus rien ne peut rejouer l'animation d'arrivée
   document.querySelectorAll("#tabs button").forEach((b,i)=>b.classList.toggle("on",TABS[i][0]===TAB));
   document.getElementById("ind").style.transform=`translateX(${TABS.findIndex(t=>t[0]===TAB)*100}%)`;
   JUST=null; animate(); checkBadges();
